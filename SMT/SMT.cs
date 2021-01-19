@@ -19,7 +19,7 @@ namespace SMT
         /// <summary>
         /// Welcome to the SMT ScreenShare Tool source code.
         /// @SMTool on Telegram
-        /// Developers (Telegram): @MrCreeper2010 - @doliv8 - @marco1337
+        /// Developers (Telegram): @MrCreeper2010 - @doliv8 - @marco1337 - @delta9tetraidrocannabinolo (ssmath)
         /// </summary>
 
         //TODO: Refractoring
@@ -89,8 +89,6 @@ namespace SMT
             Header header = new Header();
             Generics generics = new Generics();
             Checks checks = new Checks();
-
-            header.Stages(0, "Checking for minecraft");
 
             if (SMTHelper.isCorrectMC())
             {
@@ -167,6 +165,7 @@ namespace SMT
                     checks.HeuristicMCPathScan,
                     checks.OtherChecks,
                     checks.StringScan,
+                    checks.GetAllPrefetchFiles,
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)

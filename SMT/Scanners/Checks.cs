@@ -10,7 +10,6 @@ using System.Management;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SMT.scanners
 {
@@ -243,10 +242,10 @@ namespace SMT.scanners
 
                                         if (!string.IsNullOrEmpty(filename))
                                         {
-                                            string[] pcasvc_lines = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\pcasvc.txt");
-                                            for (int i = 0; i < pcasvc_lines.Length; i++)
+                                            string[] csrss_file = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt");
+                                            for (int i = 0; i < csrss_file.Length; i++)
                                             {
-                                                Match GetFullFilePath_match = GetFullFilePath.Match(pcasvc_lines[i].ToUpper());
+                                                Match GetFullFilePath_match = GetFullFilePath.Match(csrss_file[i].ToUpper());
 
                                                 if (GetFullFilePath_match.Value.Length > 0 && GetFullFilePath_match.Value.Contains(filename.ToUpper()))
                                                 {
@@ -343,6 +342,7 @@ namespace SMT.scanners
         {
             if (can_scan && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0)
             {
+                SMTHelper.UnProtectProcess(Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id);
                 SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -pid {Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
                 SMTHelper.Javaw = true;
             }
@@ -380,7 +380,7 @@ namespace SMT.scanners
             {
                 if (SMTHelper.GetPID("pcasvc") != " 0 ")
                 {
-                    SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("pcasvc")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\pcasvc.txt");
+                    
                 }
                 else
                 {
@@ -442,10 +442,31 @@ namespace SMT.scanners
                 {
                     SMT.RESULTS.event_viewer_entries.Add($"Security Event viewer logs deleted today");
                 }
+            }
 
-                if (eventlogentry.InstanceId == 4616 && SMTHelper.PC_StartTime() <= eventlogentry.TimeGenerated)
+            EventRecord entry;
+            string logPath = @"C:\Windows\System32\winevt\Logs\Security.evtx";
+            EventLogReader logReader = new EventLogReader(logPath, PathType.FilePath);
+
+            while ((entry = logReader.ReadEvent()) != null)
+            {
+                if (entry.Id != 4616)
                 {
-                    ChangeTime_list.Add(eventlogentry.TimeGenerated.ToString());
+                    continue;
+                }
+
+                if (entry.TimeCreated <= SMTHelper.PC_StartTime())
+                {
+                    continue;
+                }
+
+                IList<EventProperty> properties = entry.Properties;
+                DateTime previousTime = DateTime.Parse(properties[4].Value.ToString());
+                DateTime newTime = DateTime.Parse(properties[5].Value.ToString());
+
+                if (Math.Abs((previousTime - newTime).TotalMinutes) > 5)
+                {
+                    SMT.RESULTS.event_viewer_entries.Add($"System time change was detected: Old -> {previousTime} New -> {newTime}");
                 }
             }
 
@@ -601,115 +622,29 @@ namespace SMT.scanners
         {
             Regex Replace_Volume = new Regex(@"\\VOLUME.*?}");
             string[] prefetch_files = Directory.GetFiles(@"C:\Windows\Prefetch", "*.pf");
-            string[] match = { "5820FD00" };
+            //string[] match = { "5820FD00" }; Vape lite
 
-            Parallel.ForEach(prefetch_files, (currentfile) =>
+            for (int j = 0; j < prefetch_files.Length; j++)
             {
-                Parallel.ForEach(Prefetch.PrefetchFile.Open(currentfile).Filenames, (file_to_compare) =>
+                if (Path.GetFileName(prefetch_files[j]).Contains("REGSVR32.EXE"))
                 {
-                    if (File.GetLastWriteTime(currentfile) > SMTHelper.PC_StartTime()
-                    && Path.GetExtension(file_to_compare.ToUpper()) == ".EXE")
+                    for (int i = 0; i < Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames.Count; i++)
                     {
-                        string PeppeDuro = Replace_Volume.Replace(file_to_compare.ToUpper(), "C:");
-                        SMT.RESULTS.suspy_files.Add(PeppeDuro);
-                        //Parallel.ForEach(match, (byte_strings) =>
-                        //{
-                        //    try
-                        //    {
-                        //        byte[] matchBytes = StringToByteArray(byte_strings);
-
-                        //        if (File.Exists(PeppeDuro))
-                        //        {
-                        //            if (SMTHelper.GetSign(PeppeDuro).Contains("Unsigned"))
-                        //            {
-                        //                SMT.RESULTS.suspy_files.Add("Unsigned: " + PeppeDuro);
-                        //            }
-
-                        //            if (File.ReadAllBytes(PeppeDuro) == matchBytes)
-                        //            {
-                        //                SMT.RESULTS.string_scan.Add("Out of instance: Generic Client found " + PeppeDuro);
-                        //            }
-
-                        //            using (FileStream fs = new FileStream(PeppeDuro, FileMode.Open))
-                        //            {
-                        //                int i = 0;
-                        //                int readByte;
-                        //                while ((readByte = fs.ReadByte()) != -1)
-                        //                {
-                        //                    if (matchBytes[i] == readByte)
-                        //                    {
-                        //                        i++;
-                        //                    }
-                        //                    else
-                        //                    {
-                        //                        i = 0;
-                        //                    }
-                        //                    if (i == matchBytes.Length)
-                        //                    {
-                        //                        SMT.RESULTS.string_scan.Add("Out of instance: Generic Client found " + PeppeDuro);
-                        //                        break;
-                        //                    }
-                        //                }
-                        //            }
-                        //        }
-                        //        else
-                        //        {
-                        //            SMT.RESULTS.suspy_files.Add($"{PeppeDuro} doesn't exist from Prefetch");
-                        //        }
-                        //    }
-                        //    catch { }
-                        //});
-
-                        //files.Add(PeppeDuro);
+                        if (Path.GetExtension(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).ToUpper() == ".DLL"
+                            && Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i].Length > 0
+                        && !Directory.Exists(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i])
+                        && Path.GetExtension(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).Length > 0
+                        && Path.GetExtension(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]) == ".DLL"
+                        && File.Exists(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i])
+                        && File.ReadAllText(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).Contains("__std_type_info_destroy_list")
+                        && File.ReadAllText(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).Contains("__C_specific_handler")
+                        && File.ReadAllText(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).Contains("memset"))
+                        {
+                            SMT.RESULTS.bypass_methods.Add("DLL injected with cmd: " + Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]);
+                        }
                     }
-                });
-            });
-
-            //files.Distinct().ToList();
-
-            //for (int k = 0; k < files.Count(); k++)
-            //{
-            //    for (int j = 0; j < match.Length; j++)
-            //    {
-            //        try
-            //        {
-            //            byte[] matchBytes = StringToByteArray(match[j]);
-
-            //            if (File.Exists(files[j]))
-            //            {
-            //                if (SMTHelper.GetSign(files[j]).Contains("Unsigned"))
-            //                    SMT.RESULTS.suspy_files.Add("Unsigned: " + files[j]);
-
-            //                using (FileStream fs = new FileStream(files[k], FileMode.Open))
-            //                {
-            //                    int i = 0;
-            //                    int readByte;
-            //                    while ((readByte = fs.ReadByte()) != -1)
-            //                    {
-            //                        if (matchBytes[i] == readByte)
-            //                        {
-            //                            i++;
-            //                        }
-            //                        else
-            //                        {
-            //                            i = 0;
-            //                        }
-            //                        if (i == matchBytes.Length)
-            //                        {
-            //                            SMT.RESULTS.string_scan.Add("Out of instance: Generic Client found " + files[j]);
-            //                            break;
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //            else
-            //            {
-            //                SMT.RESULTS.suspy_files.Add($"{files[j]} doesn't exist from Prefetch");
-            //            }
-            //        }
-            //        catch { }
-            //    }
-            //}
+                }
+            }
         }
 
         public List<string> file_getpath = new List<string>();

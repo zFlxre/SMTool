@@ -57,11 +57,7 @@ namespace SMT.helpers
 
         public static DateTime PC_StartTime()
         {
-            PerformanceCounter systemUpTime = new PerformanceCounter("System", "System Up Time");
-
-            systemUpTime.NextValue();
-            TimeSpan upTimeSpan = TimeSpan.FromSeconds(systemUpTime.NextValue());
-            return DateTime.Parse(DateTime.Now.Subtract(upTimeSpan).ToShortTimeString());
+            return DateTime.Now.AddMilliseconds(-Environment.TickCount);
         }
 
         public static void Exit()
@@ -369,36 +365,7 @@ namespace SMT.helpers
             Header header = new Header();
             header.Stages(0, "SMT is loading some informations");
 
-            #region Csrss
-
-            ////Csrss
-            //string choice = "";
-
-            //Console.WriteLine("\nUpload csrss txt file to check for spoofed extension(s) and suspy files? y/n");
-            //choice = Console.ReadLine();
-
-            //switch (choice)
-            //{
-            //    case "y":
-
-            //        //Clean choice string, and use this var to get csrss's txt file
-
-            //        choice = "";
-            //        Console.WriteLine("\nUpload csrss file");
-            //        Csrss_Dir = Console.ReadLine();
-
-
-            //        break;
-
-            //    case "n":
-            //        break;
-
-            //    default:
-            //        break;
-            //}
-
-            #endregion
-
+            //csrss
             try
             {
                 UnProtectProcess(Process.GetProcessesByName("csrss")[0].Id);
@@ -414,7 +381,7 @@ namespace SMT.helpers
             {
                 if (GetPID("pcasvc") != " 0 ")
                 {
-                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("pcasvc")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\pcasvc.txt");
+                    
                 }
                 else
                 {
@@ -428,6 +395,7 @@ namespace SMT.helpers
             {
                 if (GetPID("DPS") != " 0 ")
                 {
+                    UnProtectProcess(Convert.ToInt32(GetPID("DPS")));
                     SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 19 -pid {SMTHelper.GetPID("DPS")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
                     DPS = true;
                 }
@@ -443,6 +411,7 @@ namespace SMT.helpers
             {
                 if (GetPID("Dnscache") != " 0 ")
                 {
+                    UnProtectProcess(Convert.ToInt32(GetPID("Dnscache")));
                     SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -pid {SMTHelper.GetPID("Dnscache")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
                     DNS = true;
                 }
@@ -458,6 +427,7 @@ namespace SMT.helpers
             {
                 if (GetPID("DiagTrack") != " 0 ")
                 {
+                    UnProtectProcess(Convert.ToInt32(GetPID("DiagTrack")));
                     SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
                     DiagTrack = true;
                 }
@@ -467,7 +437,6 @@ namespace SMT.helpers
                 }
             }
             catch { }
-
 
             header.Stages(0, "SMT is loading some informations");
         }

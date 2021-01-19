@@ -33,13 +33,13 @@ namespace SMT
             try
             {
                 //Default string -> "displayName" : "MrCreeper2010"
-                string launcher_profiles_file = $@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\launcher_profiles.json";
+                string launcher_profiles_file = $@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\launcher_accounts.json";
 
                 using (StreamReader read_launcher_profiles = new StreamReader(launcher_profiles_file))
                 {
                     while ((launcher_profiles_line = read_launcher_profiles.ReadLine()) != null)
                     {
-                        if (launcher_profiles_line.Contains("displayName")) //Ignore all lines without displayName to get profile
+                        if (launcher_profiles_line.Contains("\"name\" :")) //Ignore all lines without displayName to get profile
                         {
                             Regex displayname_remove = new Regex(@"\"".*?:");
                             string remove_junk1 = displayname_remove.Replace(launcher_profiles_line, "-");  //"displayName" : "MrCreeper2010" -> - "MrCreeper2010"
