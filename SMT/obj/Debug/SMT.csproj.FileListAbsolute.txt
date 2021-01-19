@@ -1,0 +1,14 @@
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\bin\Debug\SMT.exe.config
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\bin\Debug\SMT.exe
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\bin\Debug\SMT.pdb
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\bin\Debug\System.IO.Compression.dll
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\bin\Debug\System.Runtime.dll
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\obj\Debug\SMT.csprojAssemblyReference.cache
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\obj\Debug\SMT.Properties.Resources.resources
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\obj\Debug\SMT.csproj.GenerateResource.cache
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\obj\Debug\SMT.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\obj\Debug\SMT.csproj.CopyComplete
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\obj\Debug\SMT.exe
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\obj\Debug\SMT.pdb
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\bin\Debug\ProcessHacker.Common.dll
+C:\Users\user\Desktop\SMT-v3.0-master\SMT\bin\Debug\ProcessHacker.Native.dll
