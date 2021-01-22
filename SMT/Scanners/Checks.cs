@@ -545,12 +545,6 @@ namespace SMT.scanners
                 SMT.RESULTS.bypass_methods.Add("DiagTrack was restarted");
             }
 
-            List<string> ChangeTime_distincted = ChangeTime_list.Distinct().ToList();
-
-            if (ChangeTime_distincted.Count != ChangeTime_list.Count)
-            {
-                SMT.RESULTS.event_viewer_entries.Add("There is a 4616 event in Security on Eventvwr, probably System time change");
-            }
         } //Refractored
 
         public void OtherChecks()
