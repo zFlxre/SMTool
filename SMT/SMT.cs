@@ -49,8 +49,6 @@ namespace SMT
 
         private static void Main()
         {
-            Console.Title = "SMT v3.0";
-
             #region SMT_Problem
 
             //TODO: Performance problems
@@ -89,6 +87,8 @@ namespace SMT
             Header header = new Header();
             Generics generics = new Generics();
             Checks checks = new Checks();
+
+            header.Stages(0, "Looking 4 Minecraft");
 
             if (SMTHelper.isCorrectMC())
             {
@@ -165,7 +165,6 @@ namespace SMT
                     checks.HeuristicMCPathScan,
                     checks.OtherChecks,
                     checks.StringScan,
-                    checks.GetAllPrefetchFiles,
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)
@@ -177,16 +176,16 @@ namespace SMT
 
                 #region Waiting for results
 
-                header.Stages(3, SMTHelper.CheaterJoke());
+                header.Stages(1, SMTHelper.CheaterJoke());
 
                 Task.WaitAll(tasks.ToArray());
 
-                header.Stages(4, "");
+                header.Stages(2, "");
 
                 #endregion
 
                 #region Result System Generic(s) Information (Check 1)
-                ConsoleHelper.WriteLine("[i] Generic Informations: \n", ConsoleColor.Cyan);
+                ConsoleHelper.WriteLine("[i] Generic Informations: \n", ConsoleColor.Green);
 
                 ConsoleHelper.WriteLine("[i] Alts:\n", ConsoleColor.Yellow); //fatto
                 RESULTS.alts.ForEach(alt => ConsoleHelper.WriteLine("- " + alt));
@@ -246,53 +245,53 @@ namespace SMT
 
                 #region Result System "Checks" (Check 2)
 
-                ConsoleHelper.WriteLine("\n[s] Checks:", ConsoleColor.Cyan);
+                ConsoleHelper.WriteLine("\n[s] Checks:", ConsoleColor.Red);
 
                 if (RESULTS.generic_jnas.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Generic JNativeHook Clicker(s):\n", ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLine("\n[s] Generic JNativeHook Clicker(s):\n", ConsoleColor.Cyan);
                     RESULTS.generic_jnas.Distinct().ToList().ForEach(jna => ConsoleHelper.WriteLine("- " + jna));
                 }
 
                 if (RESULTS.possible_replaces.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Deleted/Replaced .exe file(s):\n", ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLine("\n[s] Deleted/Replaced .exe file(s):\n", ConsoleColor.Cyan);
                     RESULTS.possible_replaces.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
                 }
 
                 if (RESULTS.prefetch_files_deleted.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Deleted Prefetch Log(s):\n", ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLine("\n[s] Deleted Prefetch Log(s):\n", ConsoleColor.Cyan);
                     RESULTS.prefetch_files_deleted.Distinct().ToList().ForEach(strscn => ConsoleHelper.WriteLine("- " + strscn));
                 }
 
                 if (RESULTS.event_viewer_entries.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Bad Eventvwr log(s):\n", ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLine("\n[s] Bad Eventvwr log(s):\n", ConsoleColor.Cyan);
                     RESULTS.event_viewer_entries.Distinct().ToList().ForEach(eventvwr => ConsoleHelper.WriteLine("- " + eventvwr));
                 }
 
                 if (RESULTS.suspy_files.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Unsigned/Spoofed File(s) Check:\n", ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLine("\n[s] Unsigned/Spoofed File(s) Check:\n", ConsoleColor.Cyan);
                     RESULTS.suspy_files.Distinct().ToList().ForEach(suspy => ConsoleHelper.WriteLine("- " + suspy));
                 }
 
                 if (RESULTS.bypass_methods.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Bypass methods:\n", ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLine("\n[s] Bypass methods:\n", ConsoleColor.Cyan);
                     RESULTS.bypass_methods.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
                 }
 
                 if (RESULTS.HeuristicMC.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] .minecraft Informations:\n", ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLine("\n[s] .minecraft Informations:\n", ConsoleColor.Cyan);
                     RESULTS.HeuristicMC.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
                 }
 
                 if (RESULTS.string_scan.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] String Scan:\n", ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLine("\n[s] String Scan:\n", ConsoleColor.Cyan);
                     RESULTS.string_scan.Distinct().ToList().ForEach(strscn => ConsoleHelper.WriteLine("- " + strscn));
                 }
 

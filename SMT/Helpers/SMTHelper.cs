@@ -360,6 +360,28 @@ namespace SMT.helpers
             pr.WaitForExit();
         }
 
+        public static bool IsExternalClient(string SuspyFile)
+        {
+            bool isClient = false;
+
+            if (File.ReadLines(SuspyFile).First()[0] == 'M'
+                            && File.ReadLines(SuspyFile).First()[1] == 'Z'
+                            && File.ReadLines(SuspyFile).First() == "This program cannot be run in DOS mode"
+                            && File.ReadAllText(SuspyFile).Contains("__std_type_info_destroy_list")
+                            && File.ReadAllText(SuspyFile).Contains("__C_specific_handler")
+                            && File.ReadAllText(SuspyFile).Contains("memset")
+                            && (File.ReadAllText(SuspyFile).Contains("ReadProcessMemory")
+                            || File.ReadAllText(SuspyFile).Contains("WriteProcessMemory")
+                            || File.ReadAllText(SuspyFile).Contains("AllocConsole")
+                            || File.ReadAllText(SuspyFile).Contains("GetKeyState")
+                            || File.ReadAllText(SuspyFile).Contains("GetAsyncKeyState")))
+            {
+                isClient = true;
+            }
+
+            return isClient;
+        }
+
         public static void SaveAllFiles()
         {
             Header header = new Header();
@@ -381,7 +403,7 @@ namespace SMT.helpers
             {
                 if (GetPID("pcasvc") != " 0 ")
                 {
-                    
+
                 }
                 else
                 {

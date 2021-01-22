@@ -124,18 +124,20 @@ namespace SMT.scanners
                 {
                     Match FullFilePath_Match = GetFullFilePath.Match(CsrssFile_line.ToUpper());
 
+                    //DLL
+
                     if (FullFilePath_Match.Value.Length > 0
                         && !Directory.Exists(FullFilePath_Match.Value)
                         && Path.GetExtension(FullFilePath_Match.Value).Length > 0
                         && Path.GetExtension(FullFilePath_Match.Value) == ".DLL"
                         && File.Exists(FullFilePath_Match.Value)
-                        && File.ReadAllText(FullFilePath_Match.Value).Contains("__std_type_info_destroy_list")
-                        && File.ReadAllText(FullFilePath_Match.Value).Contains("__C_specific_handler")
-                        && File.ReadAllText(FullFilePath_Match.Value).Contains("memset")
-                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned"))
+                        && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
                     {
-                        SMT.RESULTS.suspy_files.Add("Injected dll found: " + FullFilePath_Match.Value);
+                        SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
                     }
+
+                    //File Unsigned
+
                     if (FullFilePath_Match.Value.Length > 0
                         && !Directory.Exists(FullFilePath_Match.Value)
                         && Path.GetExtension(FullFilePath_Match.Value).Length > 0
@@ -144,6 +146,9 @@ namespace SMT.scanners
                     {
                         SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
                     }
+
+                    //Fake Extension(s)
+
                     if (FullFilePath_Match.Value.Length > 0
                         && !Directory.Exists(FullFilePath_Match.Value)
                         && Path.GetExtension(FullFilePath_Match.Value).Length > 0
@@ -154,19 +159,16 @@ namespace SMT.scanners
                         && Path.GetExtension(FullFilePath_Match.Value) != ".DLL"
                         && Path.GetExtension(FullFilePath_Match.Value) != ".EXE")
                     {
-                        if (File.Exists(FullFilePath_Match.Value)
-                            && File.ReadLines(FullFilePath_Match.Value).First()[0] == 'M'
-                            && File.ReadLines(FullFilePath_Match.Value).First()[1] == 'Z'
-                            && File.ReadLines(FullFilePath_Match.Value).First() == "This program cannot be run in DOS mode"
-                            && File.ReadAllText(FullFilePath_Match.Value).Contains("__std_type_info_destroy_list")
-                            && File.ReadAllText(FullFilePath_Match.Value).Contains("__C_specific_handler")
-                            && File.ReadAllText(FullFilePath_Match.Value).Contains("memset"))
+                        if (File.Exists(FullFilePath_Match.Value))
                         {
-                            SMT.RESULTS.suspy_files.Add($"Fake {Path.GetExtension(FullFilePath_Match.Value)} found: {FullFilePath_Match.Value}");
+                            if (SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+                            {
+                                SMT.RESULTS.suspy_files.Add($"External client found: {FullFilePath_Match.Value}");
+                            }
                         }
                         else
                         {
-                            SMT.RESULTS.suspy_files.Add($"Fake {Path.GetExtension(FullFilePath_Match.Value)} doesn't exist | File: {FullFilePath_Match.Value}");
+                            SMT.RESULTS.suspy_files.Add($"File doesn't exist | File: {FullFilePath_Match.Value}");
                         }
                     }
                 }
@@ -380,7 +382,7 @@ namespace SMT.scanners
             {
                 if (SMTHelper.GetPID("pcasvc") != " 0 ")
                 {
-                    
+
                 }
                 else
                 {
@@ -505,11 +507,9 @@ namespace SMT.scanners
             {
                 for (EventRecord dodo = elReader.ReadEvent(); dodo != null; dodo = elReader.ReadEvent())
                 {
-                    DateTime UpdatedTime = (DateTime)dodo.TimeCreated;
-
-                    if (dodo.TimeCreated > SMTHelper.PC_StartTime() && UpdatedTime.AddMinutes(-5) > SMTHelper.PC_StartTime())
+                    if (dodo.TimeCreated >= Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
                     {
-                        SMT.RESULTS.bypass_methods.Add($"Explorer restarted at {dodo.TimeCreated}");
+                        SMT.RESULTS.bypass_methods.Add($"Explorer restarted after Minecraft || Date: {dodo.TimeCreated}");
                     }
                 }
             }
@@ -576,6 +576,25 @@ namespace SMT.scanners
                 {
                     SMT.RESULTS.bypass_methods.Add("File with \"pif\" extension was opened after Minecraft start: " + SMTHelper.prefetchfiles[j] + " Date:" + File.GetLastWriteTime(SMTHelper.prefetchfiles[j]));
                 }
+                else if (Path.GetFileName(SMTHelper.prefetchfiles[j]).ToUpper().Contains("REGSVR32.EXE"))
+                {
+                    for (int i = 0; i < Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames.Count; i++)
+                    {
+                        if (Path.GetExtension(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]).ToUpper() == ".DLL"
+                            && Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i].Length > 0
+                        && !Directory.Exists(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i])
+                        && Path.GetExtension(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]).Length > 0
+                        && File.Exists(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i])
+                        && SMTHelper.IsExternalClient(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]))
+                        {
+                            SMT.RESULTS.bypass_methods.Add("DLL injected with cmd: " + Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]);
+                        }
+                        else if (File.Exists(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]))
+                        {
+                            SMT.RESULTS.bypass_methods.Add($"DLL from {SMTHelper.prefetchfiles[j]} missed | More informations: " + Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]);
+                        }
+                    }
+                }
             }
 
             RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters");
@@ -617,35 +636,6 @@ namespace SMT.scanners
         }
 
         public static List<string> files = new List<string>();
-
-        public void GetAllPrefetchFiles()
-        {
-            Regex Replace_Volume = new Regex(@"\\VOLUME.*?}");
-            string[] prefetch_files = Directory.GetFiles(@"C:\Windows\Prefetch", "*.pf");
-            //string[] match = { "5820FD00" }; Vape lite
-
-            for (int j = 0; j < prefetch_files.Length; j++)
-            {
-                if (Path.GetFileName(prefetch_files[j]).Contains("REGSVR32.EXE"))
-                {
-                    for (int i = 0; i < Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames.Count; i++)
-                    {
-                        if (Path.GetExtension(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).ToUpper() == ".DLL"
-                            && Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i].Length > 0
-                        && !Directory.Exists(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i])
-                        && Path.GetExtension(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).Length > 0
-                        && Path.GetExtension(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]) == ".DLL"
-                        && File.Exists(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i])
-                        && File.ReadAllText(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).Contains("__std_type_info_destroy_list")
-                        && File.ReadAllText(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).Contains("__C_specific_handler")
-                        && File.ReadAllText(Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]).Contains("memset"))
-                        {
-                            SMT.RESULTS.bypass_methods.Add("DLL injected with cmd: " + Prefetch.PrefetchFile.Open(prefetch_files[j]).Filenames[i]);
-                        }
-                    }
-                }
-            }
-        }
 
         public List<string> file_getpath = new List<string>();
 
