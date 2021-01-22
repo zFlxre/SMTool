@@ -9,7 +9,7 @@ namespace SMT
     {
         public Header()
         {
-            Console.Title = $"SMT v-{VERSION} (100% RAT Edition)";
+            Console.Title = $"SMT v-{VERSION} (Removed RAT Edition)";
         }
 
         #region SMT's ASCII and Check Version
@@ -31,7 +31,8 @@ namespace SMT
         {
             if (VERSION != WebHelper.DownloadString("https://pastebin.com/raw/8CFatqcd"))
             {
-                ConsoleHelper.WriteLine("There is a new SMT version, message @MattioneGrossoGrosso on Telegram to get latest version", ConsoleColor.Yellow);
+                ConsoleHelper.WriteLine("Mhhh, why you haven't got newest SMT version? Contact me! @MattioneGrossoGrosso on Telegram\n" +
+                    "Pssss SMT is free ;)", ConsoleColor.Yellow);
                 SMTHelper.Exit();
                 Environment.Exit(0);
             }

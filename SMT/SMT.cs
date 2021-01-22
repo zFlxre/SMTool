@@ -180,7 +180,7 @@ namespace SMT
 
                 Task.WaitAll(tasks.ToArray());
 
-                header.Stages(2, "");
+                header.Stages(4, "");
 
                 #endregion
 
