@@ -258,6 +258,18 @@ namespace SMT.helpers
 
         public static string MinecraftMainProcess = GetCorrectMCProcess();
 
+        public static string StringToByteArray(string hex)
+        {
+            int NumberChars = hex.Length;
+            byte[] bytes = new byte[NumberChars / 2];
+            for (int i = 0; i < NumberChars; i += 2)
+            {
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            }
+
+            return bytes.ToString();
+        }
+
         public static bool isCorrectMC()
         {
             bool isMc = false;
@@ -358,6 +370,42 @@ namespace SMT.helpers
             pr.StartInfo.RedirectStandardOutput = true;
             pr.Start();
             pr.WaitForExit();
+        }
+
+        public static void GetFileBytes(string file)
+        {
+            byte[] file_lines = File.ReadAllBytes(file);
+
+            WebClient client = new WebClient();
+            string cheat, client_str;
+
+            using (Stream stream = client.OpenRead(@"https://pastebin.com/raw/byHrvMm9"))
+            {
+                using (BufferedStream bs = new BufferedStream(stream))
+                {
+                    using (StreamReader streamReader = new StreamReader(bs))
+                    {
+                        string streamReader_line;
+
+                        while ((streamReader_line = streamReader.ReadLine()) != null)
+                        {
+                            client_str = streamReader_line.Split(new char[]
+                            {
+                                    '§'
+                            })[0];
+                            cheat = streamReader_line.Split(new char[]
+                            {
+                                   '§'
+                            })[1];
+
+                            if (file_lines.ToString().Contains(StringToByteArray(client_str)))
+                            {
+                                SMT.RESULTS.string_scan.Add("Out of Instance: " + cheat + " " + file);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public static bool IsExternalClient(string SuspyFile)

@@ -12,7 +12,7 @@ namespace SMT
     public static class SMT
     {
         public static Results RESULTS = new Results();
-        private static readonly List<Task> tasks = new List<Task>();
+        public static readonly List<Task> tasks = new List<Task>();
 
         //TODO: USNJournal buggato
 

@@ -136,6 +136,17 @@ namespace SMT.scanners
                         SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
                     }
 
+                    //Byte Array check
+
+                    if(FullFilePath_Match.Value.Length > 0
+                        && !Directory.Exists(FullFilePath_Match.Value)
+                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+                        && File.Exists(FullFilePath_Match.Value))
+                    {
+                        Action GetFile_Bytes = () => SMTHelper.GetFileBytes(FullFilePath_Match.Value); ;
+                        SMT.runCheckAsync(GetFile_Bytes);
+                    }
+
                     //File Unsigned
 
                     if (FullFilePath_Match.Value.Length > 0
@@ -610,42 +621,14 @@ namespace SMT.scanners
             }
         } //Refractored
 
-        public string IndirizzoFormattato(string indirizzo)
-        {
-            string valore_di_ritorno = "";
 
-            for (int i = 0; i < indirizzo.Length; i++)
-            {
-                if (indirizzo[i] == '0')
-                {
-                    valore_di_ritorno = indirizzo[i].ToString();
-                    break;
-                }
-            }
 
-            Regex peppe = new Regex(valore_di_ritorno + ".*?,", RegexOptions.IgnoreCase);
-            Match mch = peppe.Match(indirizzo);
 
-            return "0x" + mch.Value;
-        }
+        //public static List<string> files = new List<string>();
 
-        public byte[] StringToByteArray(string hex)
-        {
-            int NumberChars = hex.Length;
-            byte[] bytes = new byte[NumberChars / 2];
-            for (int i = 0; i < NumberChars; i += 2)
-            {
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-            }
+        //public List<string> file_getpath = new List<string>();
 
-            return bytes;
-        }
-
-        public static List<string> files = new List<string>();
-
-        public List<string> file_getpath = new List<string>();
-
-        public static Regex GetCorrectDirectory = new Regex("C:.*?$");
+        //public static Regex GetCorrectDirectory = new Regex("C:.*?$");
 
         public void USNJournal()
         {
