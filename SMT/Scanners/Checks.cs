@@ -61,17 +61,10 @@ namespace SMT.scanners
 
                     foreach (string JarFile_InVersion in Directory.GetFiles(version_directory, "*.jar"))
                     {
-                        using (StreamReader Read_JarFile = new StreamReader(JarFile_InVersion))
+                        string File_lines = File.ReadAllText(JarFile_InVersion);
+                        if (File_lines.Contains("net/minecraft/client/main/") && File_lines.Contains(".class") && !File_lines.Contains("Main"))
                         {
-                            while ((JarFile_line = Read_JarFile.ReadLine()) != null)
-                            {
-                                if (JarFile_line.Contains("net/minecraft/client/main/") && JarFile_line.Contains(".class") && !JarFile_line.Contains("Main"))
-                                {
-                                    SMT.RESULTS.HeuristicMC.Add("There are +3 Mains in: " + JarFile_InVersion);
-                                }
-                            }
-
-                            Read_JarFile.Close();
+                            SMT.RESULTS.HeuristicMC.Add("There are +3 Mains in: " + JarFile_InVersion);
                         }
                     }
                 }
@@ -138,7 +131,7 @@ namespace SMT.scanners
 
                     //Byte Array check
 
-                    if(FullFilePath_Match.Value.Length > 0
+                    if (FullFilePath_Match.Value.Length > 0
                         && !Directory.Exists(FullFilePath_Match.Value)
                         && Path.GetExtension(FullFilePath_Match.Value).Length > 0
                         && File.Exists(FullFilePath_Match.Value))
@@ -196,19 +189,18 @@ namespace SMT.scanners
                     }
                 }
             }
+
             SMT.RESULTS.suspy_files.Sort();
         } //Refractored
 
         public void StringScannerSystem(string link, char separator, string result)
         {
             //StringScanner system by GabTeix (https://github.com/GabTeix) (project removed)
-            string[] file_lines = File.ReadAllLines(result);
 
-            string[] javaw_scanner = File.ReadAllLines(result);
+            string[] file_lines = File.ReadAllLines(result);
 
             WebClient client = new WebClient();
             string cheat, client_str;
-            Regex GetFullFilePath = new Regex("^[A-Z]:.*?EXE");
 
             List<string> clientsdetected = new List<string>();
 
@@ -251,63 +243,18 @@ namespace SMT.scanners
                                    separator
                             })[1];
 
-                            if (link == "https://pastebin.com/raw/YtQUM50C")
+                            if ((link == "https://pastebin.com/raw/YtQUM50C"
+                                || link == "https://pastebin.com/raw/bBtUqdJN"
+                                || link == "https://pastebin.com/raw/byHrvMm9")
+                                && file_lines.Contains(client_str))
                             {
-                                Regex get_file = new Regex("!!.*?!");
-                                Regex get_file2 = new Regex("!!");
-                                Regex get_file3 = new Regex("!");
-                                for (int j = 0; j < file_lines.Length; j++)
-                                {
-                                    if (file_lines[j].Contains(client_str))
-                                    {
-                                        string filename = "";
-                                        Match remove_false = get_file.Match(file_lines[j]);
-                                        filename = get_file2.Replace(remove_false.Value, "");
-                                        filename = get_file3.Replace(filename, "");
-
-                                        if (!string.IsNullOrEmpty(filename))
-                                        {
-                                            string[] csrss_file = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt");
-                                            for (int i = 0; i < csrss_file.Length; i++)
-                                            {
-                                                Match GetFullFilePath_match = GetFullFilePath.Match(csrss_file[i].ToUpper());
-
-                                                if (GetFullFilePath_match.Value.Length > 0 && GetFullFilePath_match.Value.Contains(filename.ToUpper()))
-                                                {
-                                                    SMT.RESULTS.string_scan.Add("Out of instance: " + cheat + " || File name: " + GetFullFilePath_match.Value);
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            clientsdetected.Add("Out of instance: " + cheat + " || File name: Impossible to get filename, possible special char");
-                                        }
-                                    }
-                                }
-
-
+                                SMT.RESULTS.string_scan.Add("Out of instance: " + cheat);
                             }
-                            else if (link == "https://pastebin.com/raw/bBtUqdJN")
+                            else if (link == "https://pastebin.com/raw/zh0UaeG4"
+                                && file_lines.Contains(client_str) && !cheat.Contains("Found Generic")
+                                && (can_scan == false || can_scan))
                             {
-                                if (javaw_scanner.Contains(client_str))
-                                {
-                                    SMT.RESULTS.string_scan.Add("Out of instance: " + cheat);
-                                }
-                            }
-                            else if (link == "https://pastebin.com/raw/zh0UaeG4")
-                            {
-                                if (javaw_scanner.Contains(client_str) && !cheat.Contains("Found Generic")
-                                    && (can_scan == false || can_scan))
-                                {
-                                    SMT.RESULTS.string_scan.Add("In instance: " + cheat);
-                                }
-                            }
-                            else if (link == "https://pastebin.com/raw/byHrvMm9")
-                            {
-                                if (file_lines.Contains(client_str))
-                                {
-                                    SMT.RESULTS.string_scan.Add("Out of instance:" + cheat);
-                                }
+                                SMT.RESULTS.string_scan.Add("In instance: " + cheat);
                             }
                         }
                     }
@@ -326,38 +273,26 @@ namespace SMT.scanners
         {
             if (SMTHelper.DPS)
             {
-                //header.Stages(4, "String Scan Check (Scanning DPS)");
                 StringScannerSystem("https://pastebin.com/raw/YtQUM50C", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
             }
 
             if (SMTHelper.DNS)
             {
-                //header.Stages(4, "String Scan Check (Scanning Dnscache)");
-
                 StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
             }
 
             if (SMTHelper.Javaw)
             {
-                //header.Stages(4, "String Scan Check (Scanning Javaw)");
-
                 StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
-
             }
 
             if (SMTHelper.DiagTrack)
             {
-                string line = "";
+                string file_lines = File.ReadAllText($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
 
-                using (StreamReader sr = new StreamReader($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt"))
+                if ((file_lines.Contains("cmd.exe") && file_lines.Contains("del")) || file_lines.Contains("/c ping 1.1.1.1 -n 1 -w 3000 > nul & del /f /q"))
                 {
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        if ((line.Contains("cmd.exe") && line.Contains("del")) || line.Contains("/c ping 1.1.1.1 -n 1 -w 3000 > nul & del /f /q"))
-                        {
-                            SMT.RESULTS.string_scan.Add($"Out of instance: Generic Command Line self-destruct Found!");
-                        }
-                    }
+                    SMT.RESULTS.string_scan.Add($"Out of instance: Generic Command Line self-destruct Found!");
                 }
             }
 

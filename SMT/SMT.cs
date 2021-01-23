@@ -49,41 +49,6 @@ namespace SMT
 
         private static void Main()
         {
-            #region SMT_Problem
-
-            //TODO: Performance problems
-
-            //Regex Replace_Volume = new Regex(@"\\VOLUME.*?}");
-            //string[] prefetch_files = Directory.GetFiles(@"C:\Windows\Prefetch", "*.pf");
-            //string[] match = { "58 20 FD 00" };
-
-            //for(int i = 0; i < prefetch_files.Length; i++)
-            //{
-            //   for(int j = 0; j < Prefetch.PrefetchFile.Open(prefetch_files[i]).Filenames.Count; j++)
-            //    {
-            //        if (File.GetLastWriteTime(prefetch_files[i]) > SMTHelper.PC_StartTime()
-            //        && Path.GetExtension(Prefetch.PrefetchFile.Open(prefetch_files[i]).Filenames[j].ToUpper()) == ".EXE")
-            //        {
-            //            string PeppeDuro = Replace_Volume.Replace(Prefetch.PrefetchFile.Open(prefetch_files[i]).Filenames[j].ToUpper(), "C:");
-            //            Console.WriteLine(PeppeDuro);
-            //        }
-            //    }
-            //}
-
-            //Parallel.ForEach(prefetch_files, (currentfile) =>
-            //{
-            //    Parallel.ForEach(Prefetch.PrefetchFile.Open(currentfile).Filenames, (file_to_compare) =>
-            //    {
-            //        if (File.GetLastWriteTime(currentfile) > SMTHelper.PC_StartTime()
-            //        && Path.GetExtension(file_to_compare.ToUpper()) == ".EXE")
-            //        {
-            //            string PeppeDuro = Replace_Volume.Replace(file_to_compare.ToUpper(), "C:");
-            //            Console.WriteLine(PeppeDuro);
-            //        }
-            //    });
-            //});
-            #endregion
-
             Header header = new Header();
             Generics generics = new Generics();
             Checks checks = new Checks();
@@ -101,8 +66,8 @@ namespace SMT
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    checks.SaveJournal,
-                    checks.SaveJavaw,
+                    //checks.SaveJournal,
+                    //checks.SaveJavaw,
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -142,14 +107,14 @@ namespace SMT
 
                 Action[] genericChecks = new Action[]
                 {
-                generics.Alts_check,
-                generics.GetXrayResourcePack,
-                generics.checkRecordingSoftwares,
-                generics.isVM,
-                generics.isVPN,
-                generics.RecycleBin_check,
-                generics.ProcessesStartup_Check,
-                generics.GetMouse
+                //generics.Alts_check,
+                //generics.GetXrayResourcePack,
+                //generics.checkRecordingSoftwares,
+                //generics.isVM,
+                //generics.isVPN,
+                //generics.RecycleBin_check,
+                //generics.ProcessesStartup_Check,
+                //generics.GetMouse
                 };
 
                 for (int j = 0; j < genericChecks.Length; j++)
@@ -160,11 +125,11 @@ namespace SMT
                 Action[] scannerChecks = new Action[]
                 {
                     checks.HeuristicCsrssCheck,
-                    checks.EventVwrCheck,
-                    checks.USNJournal,
-                    checks.HeuristicMCPathScan,
-                    checks.OtherChecks,
-                    checks.StringScan,
+                    //checks.EventVwrCheck,
+                    //checks.USNJournal,
+                    //checks.HeuristicMCPathScan,
+                    //checks.OtherChecks,
+                    //checks.StringScan,
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)
