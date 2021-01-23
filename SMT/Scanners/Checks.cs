@@ -147,6 +147,18 @@ namespace SMT.scanners
                         SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
                     }
 
+                    //Get Vape Lite and Yukio
+
+                    if (FullFilePath_Match.Value.Length > 0
+                        && !Directory.Exists(FullFilePath_Match.Value)
+                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+                        && Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        && (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
+                        || SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Mynt SASU")))
+                    {
+                        SMT.RESULTS.suspy_files.Add("File with Generic Client's digital sign: " + FullFilePath_Match.Value);
+                    }
+
                     //Fake Extension(s)
 
                     if (FullFilePath_Match.Value.Length > 0
