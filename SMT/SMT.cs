@@ -130,6 +130,7 @@ namespace SMT
                     checks.USNJournal,
                     checks.OtherChecks,
                     checks.StringScan,
+                    checks.isValueJournalDefault,
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)

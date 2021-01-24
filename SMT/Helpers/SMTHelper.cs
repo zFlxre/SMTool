@@ -260,6 +260,13 @@ namespace SMT.helpers
             return isMc;
         }
 
+        public static void Loading()
+        {
+            while(true)
+            { 
+            }
+        }
+
         public static string CheaterJoke()
         {
             string Joke = "";
@@ -391,7 +398,7 @@ namespace SMT.helpers
 
             }
 
-            //pcasvc
+            //pcasvc (non scanna più)
             try
             {
                 if (GetPID("pcasvc") != " 0 ")

@@ -127,6 +127,29 @@ namespace SMT.scanners
             SMT.RESULTS.suspy_files.Sort();
         } //Refractored
 
+        public Process pr = new Process();
+
+        public void isValueJournalDefault()
+        {
+            pr.StartInfo.FileName = "CMD.exe";
+            pr.StartInfo.Arguments = "fsutil usn queryjournal C:";
+            pr.StartInfo.UseShellExecute = false;
+            pr.StartInfo.RedirectStandardOutput = true;
+            pr.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            pr.Start();
+            pr.WaitForExit();
+            string output = pr.StandardOutput.ReadToEnd();
+            pr.Close();
+
+            if (!output.Contains("0x7fffffffffff0000")
+                && !output.Contains("0x0000000002000000 (32,0 MB)")
+                && !output.Contains("0x0000000000800000")
+                && !output.Contains("0x0000000000000000"))
+            {
+                SMT.RESULTS.bypass_methods.Add("USN Journal's default values was modified");
+            }
+        }
+
         public void StringScannerSystem(string link, char separator, string result)
         {
             //StringScanner system by GabTeix (https://github.com/GabTeix) (project removed)
@@ -237,7 +260,7 @@ namespace SMT.scanners
             if (can_scan && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0)
             {
                 SMTHelper.UnProtectProcess(Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id);
-                SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -pid {Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
+                SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -a -pid {Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
                 SMTHelper.Javaw = true;
             }
         }
@@ -246,7 +269,7 @@ namespace SMT.scanners
         {
             if (can_scan && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0)
             {
-                SMTHelper.SaveFile($"fsutil usn readjournal c: csv | findstr /i /C:\"" + "0x80000200" + "\"" + " /C:\"" + "0x00001000" + "\"" + " /C:\"" + "0x80200120" + "\"" +" /C:\"" + "0x00000800" + "\"" + $@" > C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
+                SMTHelper.SaveFile($"fsutil usn readjournal c: csv | findstr /i /C:\"" + "0x80000200" + "\"" + " /C:\"" + "0x00001000" + "\"" + " /C:\"" + "0x80200120" + "\"" + " /C:\"" + "0x00000800" + "\"" + $@" > C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
                 SMTHelper.Javaw = true;
             }
         }

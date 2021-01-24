@@ -9,7 +9,7 @@ namespace SMT
     {
         public Header()
         {
-            Console.Title = $"SMT v-{VERSION} (Removed RAT Edition)";
+            Console.Title = $"SMT v-{VERSION} (LGBT Edition)";
         }
 
         #region SMT's ASCII and Check Version
@@ -22,7 +22,7 @@ namespace SMT
   ╚════██║██║╚██╔╝██║   ██║   
   ███████║██║ ╚═╝ ██║   ██║   
   ╚══════╝╚═╝     ╚═╝   ╚═╝   
-                                                    MEME: Is SMT a RAT? Yes, it is RAT++                " + "\n";
+                                                    Ciao amic*                " + "\n";
 
         public static string VERSION => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         #endregion
