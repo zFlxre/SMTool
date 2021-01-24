@@ -77,28 +77,6 @@ namespace SMT.helpers
             return DateTime.Parse(data_fiunzoa);
         }
 
-        public static Match GetFirstID(string line)
-        {
-            string directory;
-
-            Match GetDirectory = GetID.Match(line);
-            directory = leva_primevirgole.Replace(GetDirectory.Value, "");
-            directory = replace0x.Replace(directory, "");
-            directory = virgole.Replace(directory, "");
-            directory = apostrofo.Replace(directory, "");
-            return getaddress.Match(directory);
-        }
-
-        public static string GetSecondID(string line)
-        {
-            string directory2 = "";
-            Regex GetSecondID = new Regex("\",00.*?,");
-
-            Match GetDirectory2 = GetSecondID.Match(line);
-            directory2 = virgole.Replace(GetDirectory2.Value, "");
-            return apostrofo.Replace(directory2, "");
-        }
-
         public static string GetPID(string process)
         {
             string finalpid = "";
@@ -308,39 +286,6 @@ namespace SMT.helpers
 
             return Joke;
         }
-
-        //public static NtFile OpenReparseDirectory(string volume)
-        //{
-        //    return NtFile.Open($@"\??\{volume}\$Extend\$Reparse:$R:$INDEX_ALLOCATION", null, FileAccessRights.GenericRead | FileAccessRights.Synchronize,
-        //        FileShareMode.Read, FileOpenOptions.OpenForBackupIntent | FileOpenOptions.SynchronousIoNonAlert);
-        //}
-
-        //public static void EnablePrivileges()
-        //{
-        //    using (NtToken token = NtToken.OpenProcessToken())
-        //    {
-        //        token.SetPrivilege(TokenPrivilegeValue.SeBackupPrivilege, PrivilegeAttributes.Enabled);
-        //        token.SetPrivilege(TokenPrivilegeValue.SeRestorePrivilege, PrivilegeAttributes.Enabled);
-        //    }
-        //}
-
-        //public static void GetFileData(NtFile volume, ReparseTag tag, long fileid)
-        //{
-        //    using (NtFile file = NtFile.OpenFileById(volume, fileid, FileAccessRights.ReadAttributes | FileAccessRights.Synchronize,
-        //        FileShareMode.None, FileOpenOptions.DirectoryFile | FileOpenOptions.SynchronousIoNonAlert | FileOpenOptions.OpenForBackupIntent))
-        //    {
-        //        //string filename = file.GetWin32PathName(NtApiDotNet.Win32.Win32PathNameFlags.None, false).GetResultOrDefault(fileid.ToString());
-
-        //        try
-        //        {
-        //            SMT.RESULTS.suspy_files.Add(file.GetFileName(true).ToString());
-        //        }
-        //        catch (NtException)
-        //        {
-
-        //        }
-        //    }
-        //}
 
         public static string GetSign(string file)
         {

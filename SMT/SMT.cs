@@ -114,7 +114,8 @@ namespace SMT
                 generics.isVPN,
                 generics.RecycleBin_check,
                 generics.ProcessesStartup_Check,
-                generics.GetMouse
+                generics.GetMouse,
+                generics.HeuristicMCPathScan,
                 };
 
                 for (int j = 0; j < genericChecks.Length; j++)
@@ -127,7 +128,6 @@ namespace SMT
                     checks.HeuristicCsrssCheck,
                     checks.EventVwrCheck,
                     checks.USNJournal,
-                    checks.HeuristicMCPathScan,
                     checks.OtherChecks,
                     checks.StringScan,
                 };
@@ -197,6 +197,12 @@ namespace SMT
                     Console.WriteLine("- No click devices found");
                 }
 
+                if (RESULTS.HeuristicMC.Count > 0) // done
+                {
+                    ConsoleHelper.WriteLine("\n[s] .minecraft Informations:\n", ConsoleColor.Cyan);
+                    RESULTS.HeuristicMC.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
+                }
+
                 if (RESULTS.virtual_machine)
                 {
                     ConsoleHelper.WriteLine("\n[!] Tool is running on Virtual Machine, please investigate", ConsoleColor.Red); //fatto
@@ -246,12 +252,6 @@ namespace SMT
                 {
                     ConsoleHelper.WriteLine("\n[s] Bypass methods:\n", ConsoleColor.Cyan);
                     RESULTS.bypass_methods.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
-                }
-
-                if (RESULTS.HeuristicMC.Count > 0) // done
-                {
-                    ConsoleHelper.WriteLine("\n[s] .minecraft Informations:\n", ConsoleColor.Cyan);
-                    RESULTS.HeuristicMC.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
                 }
 
                 if (RESULTS.string_scan.Count > 0) // done

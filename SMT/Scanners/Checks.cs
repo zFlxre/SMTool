@@ -40,71 +40,6 @@ namespace SMT.scanners
         private readonly Regex GetFullFilePath = new Regex(@"[A-Z]:\\.*?$");
         #endregion
 
-        public void HeuristicMCPathScan()
-        {
-            string JarFile_line;
-            int LibrariesIO_counter = 0;
-
-            List<string> GetAll_SuspyDirectories = new List<string>();
-
-            if (Directory.Exists($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\versions"))
-            {
-                //Hidden versions + Check Main
-                foreach (string version_directory in Directory.GetDirectories($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\versions"))
-                {
-                    FileInfo fInfo = new FileInfo(version_directory);
-
-                    if (fInfo.Attributes.HasFlag(System.IO.FileAttributes.Hidden))
-                    {
-                        SMT.RESULTS.HeuristicMC.Add("This folder has been hidden: " + version_directory + " please investigate");
-                    }
-
-                    foreach (string JarFile_InVersion in Directory.GetFiles(version_directory, "*.jar"))
-                    {
-                        string File_lines = File.ReadAllText(JarFile_InVersion);
-                        if (File_lines.Contains("net/minecraft/client/main/") && File_lines.Contains(".class") && !File_lines.Contains("Main"))
-                        {
-                            SMT.RESULTS.HeuristicMC.Add("There are +3 Mains in: " + JarFile_InVersion);
-                        }
-                    }
-                }
-
-                //SerenityB26, AVIX
-                foreach (string io_directory in Directory.GetDirectories($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\libraries\io"))
-                {
-                    if (io_directory.Length > 0)
-                    {
-                        ++LibrariesIO_counter;
-                        GetAll_SuspyDirectories.Add(io_directory);
-                    }
-                }
-
-                foreach (string Single_Directory in GetAll_SuspyDirectories)
-                {
-                    if (LibrariesIO_counter > 1 && !Single_Directory.Contains("netty"))
-                    {
-                        SMT.RESULTS.HeuristicMC.Add($@"There is another directory in C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\libraries\io called {Single_Directory}");
-                    }
-                }
-                LibrariesIO_counter = 0;
-            }
-            else
-            {
-                SMT.RESULTS.HeuristicMC.Add(".minecraft folder unreachable");
-            }
-
-            try
-            {
-                if (VirtualDesktop.Desktop.Count > 1)
-                {
-                    SMT.RESULTS.HeuristicMC.Add($"There are {VirtualDesktop.Desktop.Count} virtual desktops," +
-                        $" please press Windows + TAB and investigate");
-                }
-            }
-            catch { SMT.RESULTS.HeuristicMC.Add("Virtual Desktop(s) unreachable"); }
-
-        } //Refractored
-
         public void HeuristicCsrssCheck()
         {
             string CsrssFile_line;
@@ -128,8 +63,7 @@ namespace SMT.scanners
                         SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
                     }
 
-                    //Byte Array check
-
+                    #region ByteArray Check
                     //if (FullFilePath_Match.Value.Length > 0
                     //    && !Directory.Exists(FullFilePath_Match.Value)
                     //    && Path.GetExtension(FullFilePath_Match.Value).Length > 0
@@ -138,6 +72,7 @@ namespace SMT.scanners
                     //    Action GetFile_Bytes = () => SMTHelper.GetFileBytes(FullFilePath_Match.Value); ;
                     //    SMT.runCheckAsync(GetFile_Bytes);
                     //}
+                    #endregion
 
                     //File Unsigned
 
@@ -393,8 +328,6 @@ namespace SMT.scanners
             string StorageSpaces = "Microsoft-Windows-StorageSpaces-Driver/Operational";
             string bQuery = "*[System/EventID=207]";
 
-            List<string> ChangeTime_list = new List<string>();
-
             foreach (EventLogEntry eventlogentry in GetSecurity_log.Entries)
             {
                 if (eventlogentry.InstanceId == 1102 && SMTHelper.PC_StartTime() < eventlogentry.TimeGenerated)
@@ -554,15 +487,6 @@ namespace SMT.scanners
                 SMT.RESULTS.bypass_methods.Add("Prefetch is not active correctly, probable partial or complete disablement");
             }
         } //Refractored
-
-
-
-
-        //public static List<string> files = new List<string>();
-
-        //public List<string> file_getpath = new List<string>();
-
-        //public static Regex GetCorrectDirectory = new Regex("C:.*?$");
 
         public void USNJournal()
         {
