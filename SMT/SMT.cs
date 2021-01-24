@@ -66,8 +66,8 @@ namespace SMT
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    //checks.SaveJournal,
-                    //checks.SaveJavaw,
+                    checks.SaveJournal,
+                    checks.SaveJavaw,
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -107,14 +107,14 @@ namespace SMT
 
                 Action[] genericChecks = new Action[]
                 {
-                //generics.Alts_check,
-                //generics.GetXrayResourcePack,
-                //generics.checkRecordingSoftwares,
-                //generics.isVM,
-                //generics.isVPN,
-                //generics.RecycleBin_check,
-                //generics.ProcessesStartup_Check,
-                //generics.GetMouse
+                generics.Alts_check,
+                generics.GetXrayResourcePack,
+                generics.checkRecordingSoftwares,
+                generics.isVM,
+                generics.isVPN,
+                generics.RecycleBin_check,
+                generics.ProcessesStartup_Check,
+                generics.GetMouse
                 };
 
                 for (int j = 0; j < genericChecks.Length; j++)
@@ -125,11 +125,11 @@ namespace SMT
                 Action[] scannerChecks = new Action[]
                 {
                     checks.HeuristicCsrssCheck,
-                    //checks.EventVwrCheck,
-                    //checks.USNJournal,
-                    //checks.HeuristicMCPathScan,
-                    //checks.OtherChecks,
-                    //checks.StringScan,
+                    checks.EventVwrCheck,
+                    checks.USNJournal,
+                    checks.HeuristicMCPathScan,
+                    checks.OtherChecks,
+                    checks.StringScan,
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)

@@ -109,7 +109,6 @@ namespace SMT.scanners
         {
             string CsrssFile_line;
             CsrssFile_line = "";
-            List<string> Results_duplicated = new List<string>();
 
             using (StreamReader Read_CsrssFile = new StreamReader($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt"))
             {
@@ -131,14 +130,14 @@ namespace SMT.scanners
 
                     //Byte Array check
 
-                    if (FullFilePath_Match.Value.Length > 0
-                        && !Directory.Exists(FullFilePath_Match.Value)
-                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                        && File.Exists(FullFilePath_Match.Value))
-                    {
-                        Action GetFile_Bytes = () => SMTHelper.GetFileBytes(FullFilePath_Match.Value); ;
-                        SMT.runCheckAsync(GetFile_Bytes);
-                    }
+                    //if (FullFilePath_Match.Value.Length > 0
+                    //    && !Directory.Exists(FullFilePath_Match.Value)
+                    //    && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+                    //    && File.Exists(FullFilePath_Match.Value))
+                    //{
+                    //    Action GetFile_Bytes = () => SMTHelper.GetFileBytes(FullFilePath_Match.Value); ;
+                    //    SMT.runCheckAsync(GetFile_Bytes);
+                    //}
 
                     //File Unsigned
 
@@ -312,7 +311,7 @@ namespace SMT.scanners
         {
             if (can_scan && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0)
             {
-                SMTHelper.SaveFile($"fsutil usn readjournal c: csv | findstr /i /C:\"" + "0x80000200" + "\"" + " /C:\"" + "0x00001000" + "\"" + " /C:\"" + "0x80200120" + "\"" + $@" > C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
+                SMTHelper.SaveFile($"fsutil usn readjournal c: csv | findstr /i /C:\"" + "0x80000200" + "\"" + " /C:\"" + "0x00001000" + "\"" + " /C:\"" + "0x80200120" + "\"" +" /C:\"" + "0x00000800" + "\"" + $@" > C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
                 SMTHelper.Javaw = true;
             }
         }
@@ -567,21 +566,11 @@ namespace SMT.scanners
 
         public void USNJournal()
         {
-
             #region Variabili
 
             string[] GetPrefetch_files = Directory.GetFiles(@"C:\Windows\Prefetch\", "*.pf");
             string[] GetTemp_files = Directory.GetFiles($@"C:\Users\{Environment.UserName}\AppData\Local\Temp");
 
-            //Regex
-            //Regex data = new Regex(Today.ToString("d") + ".*?,", RegexOptions.IgnoreCase);
-            //Regex TraApostrofo = new Regex("\".*?\"");
-            //Regex GetSecondID = new Regex("\",00.*?,");
-            //Regex GetID = new Regex("\",0.*?,0x");
-            //Regex leva_primevirgole = new Regex("\",.*?,");
-            //Regex replace0x = new Regex(",0x");
-            //Regex getaddress = new Regex("0.*?$");
-            Regex Replace_Volume = new Regex(@"\\VOLUME.*?}");
             Regex GetCorrect_file = new Regex(",.*?PF");
             Regex Exe_file = new Regex(",\".*?\",");
             Regex virgole = new Regex(",");
