@@ -29,7 +29,7 @@ namespace SMT
 
         private void Check_Updates()
         {
-            if (VERSION != WebHelper.DownloadString("https://pastebin.com/raw/8CFatqcd"))
+            if (VERSION == WebHelper.DownloadString("https://pastebin.com/raw/8CFatqcd"))
             {
                 ConsoleHelper.WriteLine("Mhhh, why you haven't got newest SMT version? Contact me! @MattioneGrossoGrosso on Telegram\n" +
                     "Pssss SMT is free ;)", ConsoleColor.Yellow);

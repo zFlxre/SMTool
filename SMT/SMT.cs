@@ -53,6 +53,30 @@ namespace SMT
             Generics generics = new Generics();
             Checks checks = new Checks();
 
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    foreach (ProcessThread processThread in Process.GetCurrentProcess().Threads)
+                    {
+                        if (processThread.ThreadState != System.Diagnostics.ThreadState.Terminated)
+                        {
+                            try
+                            {
+                                processThread.PriorityLevel = ThreadPriorityLevel.TimeCritical;
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                    }
+
+                    Thread.Sleep(50);
+                }
+            }).Start();
+
             header.Stages(0, "Looking 4 Minecraft");
 
             if (SMTHelper.isCorrectMC())
@@ -61,8 +85,8 @@ namespace SMT
 
                 SMTHelper.DeleteMenu(SMTHelper.GetSystemMenu(SMTHelper.GetConsoleWindow(), false), SMTHelper.SC_CLOSE, SMTHelper.MF_BYCOMMAND);
 
-                SMTHelper.ExtractFile();
-                SMTHelper.SaveAllFiles();
+                //SMTHelper.ExtractFile();
+                //SMTHelper.SaveAllFiles();
 
                 Action[] SaveAllFiles = new Action[]
                 {
@@ -76,30 +100,6 @@ namespace SMT
                 }
 
                 Task.WaitAll(tasks.ToArray());
-
-                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
-                new Thread(() =>
-                {
-                    while (true)
-                    {
-                        foreach (ProcessThread processThread in Process.GetCurrentProcess().Threads)
-                        {
-                            if (processThread.ThreadState != System.Diagnostics.ThreadState.Terminated)
-                            {
-                                try
-                                {
-                                    processThread.PriorityLevel = ThreadPriorityLevel.TimeCritical;
-                                }
-                                catch
-                                {
-
-                                }
-                            }
-                        }
-
-                        Thread.Sleep(50);
-                    }
-                }).Start();
 
                 #endregion
 
@@ -125,12 +125,12 @@ namespace SMT
 
                 Action[] scannerChecks = new Action[]
                 {
-                    checks.HeuristicCsrssCheck,
+                    //checks.HeuristicCsrssCheck,
                     checks.EventVwrCheck,
-                    checks.USNJournal,
-                    checks.OtherChecks,
-                    checks.StringScan,
-                    checks.isValueJournalDefault,
+                    //checks.USNJournal,
+                    //checks.OtherChecks,
+                    //checks.StringScan,
+                    //checks.isValueJournalDefault,
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)

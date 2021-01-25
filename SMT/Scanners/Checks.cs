@@ -247,7 +247,7 @@ namespace SMT.scanners
             {
                 string file_lines = File.ReadAllText($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
 
-                if ((file_lines.Contains("cmd.exe") && file_lines.Contains("del")) || file_lines.Contains("/c ping 1.1.1.1 -n 1 -w 3000 > nul & del /f /q"))
+                if ((file_lines.Contains("cmd.exe") && file_lines.Contains("del") && file_lines.Contains(".pf")) || file_lines.Contains("/c ping 1.1.1.1 -n 1 -w 3000 > nul & del /f /q"))
                 {
                     SMT.RESULTS.string_scan.Add($"Out of instance: Generic Command Line self-destruct Found!");
                 }
