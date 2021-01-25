@@ -51,17 +51,67 @@ namespace SMT.scanners
                 {
                     Match FullFilePath_Match = GetFullFilePath.Match(CsrssFile_line.ToUpper());
 
-                    //DLL
+                    /*
+                     * 1° Check Vape Lite/Yukio (firma digitale)
+                     * 2° Check .EXE senza firma digitale
+                     * 3° Check .DLL
+                     * 4° Check estensioni spoofate
+                     */
 
                     if (FullFilePath_Match.Value.Length > 0
                         && !Directory.Exists(FullFilePath_Match.Value)
                         && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                        && Path.GetExtension(FullFilePath_Match.Value) == ".DLL"
-                        && File.Exists(FullFilePath_Match.Value)
-                        && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+                        && File.Exists(FullFilePath_Match.Value))
                     {
-                        SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
+                        if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                            && (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
+                            || SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Mynt SASU")))
+                        {
+                            SMT.RESULTS.suspy_files.Add("File with Generic Client's digital signature: " + FullFilePath_Match.Value);
+                        }
+                        else if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                            && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned"))
+                        {
+                            for (int i = 0; i < SMTHelper.prefetchfiles.Length; i++)
+                            {
+                                if (Path.GetFileName(SMTHelper.prefetchfiles[i].ToUpper()).Contains(FullFilePath_Match.Value.ToUpper()))
+                                {
+                                    SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
+                                }
+                            }
+                        }
+                        else if (Path.GetExtension(FullFilePath_Match.Value) == ".DLL"
+                            && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+                        {
+                            SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
+                        }
+                        else if (Path.GetExtension(FullFilePath_Match.Value) != ".CONFIG"
+                            && Path.GetExtension(FullFilePath_Match.Value) != ".CPL"
+                            && Path.GetExtension(FullFilePath_Match.Value) != ".NODE"
+                            && Path.GetExtension(FullFilePath_Match.Value) != ".MANIFEST"
+                            && Path.GetExtension(FullFilePath_Match.Value) != ".DLL"
+                            && Path.GetExtension(FullFilePath_Match.Value) != ".EXE"
+                            && File.Exists(FullFilePath_Match.Value)
+                            && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+                        {
+                            SMT.RESULTS.suspy_files.Add($"External client found: {FullFilePath_Match.Value}");
+                        }
                     }
+                    else if (FullFilePath_Match.Value.Length > 0
+                        && !Directory.Exists(FullFilePath_Match.Value)
+                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+                        && !File.Exists(FullFilePath_Match.Value)
+                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() == ".EXE")
+                    {
+                        for (int i = 0; i < SMTHelper.prefetchfiles.Length; i++)
+                        {
+                            if (Path.GetFileName(SMTHelper.prefetchfiles[i].ToUpper()).Contains(FullFilePath_Match.Value.ToUpper()))
+                            {
+                                SMT.RESULTS.suspy_files.Add("File missed: " + FullFilePath_Match.Value);
+                            }
+                        }
+                    }
+
 
                     #region ByteArray Check
                     //if (FullFilePath_Match.Value.Length > 0
@@ -74,53 +124,6 @@ namespace SMT.scanners
                     //}
                     #endregion
 
-                    //File Unsigned
-
-                    if (FullFilePath_Match.Value.Length > 0
-                        && !Directory.Exists(FullFilePath_Match.Value)
-                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                        && Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned"))
-                    {
-                        SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
-                    }
-
-                    //Get Vape Lite and Yukio
-
-                    if (FullFilePath_Match.Value.Length > 0
-                        && !Directory.Exists(FullFilePath_Match.Value)
-                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                        && Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                        && (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
-                        || SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Mynt SASU")))
-                    {
-                        SMT.RESULTS.suspy_files.Add("File with Generic Client's digital sign: " + FullFilePath_Match.Value);
-                    }
-
-                    //Fake Extension(s)
-
-                    if (FullFilePath_Match.Value.Length > 0
-                        && !Directory.Exists(FullFilePath_Match.Value)
-                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".CONFIG"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".CPL"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".NODE"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".MANIFEST"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".DLL"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".EXE")
-                    {
-                        if (File.Exists(FullFilePath_Match.Value))
-                        {
-                            if (SMTHelper.IsExternalClient(FullFilePath_Match.Value))
-                            {
-                                SMT.RESULTS.suspy_files.Add($"External client found: {FullFilePath_Match.Value}");
-                            }
-                        }
-                        else
-                        {
-                            SMT.RESULTS.suspy_files.Add($"File doesn't exist | File: {FullFilePath_Match.Value}");
-                        }
-                    }
                 }
             }
 
@@ -589,18 +592,18 @@ namespace SMT.scanners
                         SMT.RESULTS.bypass_methods.Add($@"Wmic found on: {file_missed} ({data_fiunzoa})");
                     }
                 }
-                else if (usn_results[j].Contains("0x00000800") && usn_results[j].Contains("Prefetch"))
-                {
-                    Match mch = GetData.Match(usn_results[j]);
-                    data_fiunzoa = apostrofo.Replace(mch.Value, "");
-                    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
-                    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+                //else if (usn_results[j].Contains("0x00000800") && usn_results[j].Contains("Prefetch"))
+                //{
+                //    Match mch = GetData.Match(usn_results[j]);
+                //    data_fiunzoa = apostrofo.Replace(mch.Value, "");
+                //    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+                //    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                    if (DateToCompare >= SMTHelper.PC_StartTime())
-                    {
-                        SMT.RESULTS.bypass_methods.Add($@"Shitty method found (cacls) {data_fiunzoa}");
-                    }
-                }
+                //    if (DateToCompare >= SMTHelper.PC_StartTime())
+                //    {
+                //        SMT.RESULTS.bypass_methods.Add($@"Shitty method found (cacls) {data_fiunzoa}");
+                //    }
+                //}
                 else if (usn_results[j].ToUpper().Contains(".EXE"))
                 {
                     Match ExeFile = Exe_file.Match(usn_results[j].ToUpper());

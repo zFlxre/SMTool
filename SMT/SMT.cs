@@ -79,19 +79,19 @@ namespace SMT
 
             header.Stages(0, "Looking 4 Minecraft");
 
-            if (SMTHelper.isCorrectMC())
+            if (!SMTHelper.isCorrectMC())
             {
                 #region Delete close button - ExtractFile - SaveFiles - Classes - Priority
 
                 SMTHelper.DeleteMenu(SMTHelper.GetSystemMenu(SMTHelper.GetConsoleWindow(), false), SMTHelper.SC_CLOSE, SMTHelper.MF_BYCOMMAND);
 
-                //SMTHelper.ExtractFile();
-                //SMTHelper.SaveAllFiles();
+                SMTHelper.ExtractFile();
+                SMTHelper.SaveAllFiles();
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    checks.SaveJournal,
-                    checks.SaveJavaw,
+                    //checks.SaveJournal,
+                    //checks.SaveJavaw,
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -107,15 +107,15 @@ namespace SMT
 
                 Action[] genericChecks = new Action[]
                 {
-                generics.Alts_check,
-                generics.GetXrayResourcePack,
-                generics.checkRecordingSoftwares,
-                generics.isVM,
-                generics.isVPN,
-                generics.RecycleBin_check,
-                generics.ProcessesStartup_Check,
-                generics.GetMouse,
-                generics.HeuristicMCPathScan,
+                //generics.Alts_check,
+                //generics.GetXrayResourcePack,
+                //generics.checkRecordingSoftwares,
+                //generics.isVM,
+                //generics.isVPN,
+                //generics.RecycleBin_check,
+                //generics.ProcessesStartup_Check,
+                //generics.GetMouse,
+                //generics.HeuristicMCPathScan,
                 };
 
                 for (int j = 0; j < genericChecks.Length; j++)
@@ -125,8 +125,8 @@ namespace SMT
 
                 Action[] scannerChecks = new Action[]
                 {
-                    //checks.HeuristicCsrssCheck,
-                    checks.EventVwrCheck,
+                    checks.HeuristicCsrssCheck,
+                    //checks.EventVwrCheck,
                     //checks.USNJournal,
                     //checks.OtherChecks,
                     //checks.StringScan,
