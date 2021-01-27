@@ -172,63 +172,22 @@ namespace SMT.helpers
                     {
                         if (Javaw.WorkingSet64 > Java.WorkingSet64)
                         {
-                            for (int i = 0; i < Process.GetProcessesByName("javaw").Length; i++)
-                            {
-                                for (int j = 0; j < Process.GetProcessesByName("javaw")[i].Modules.Count; j++)
-                                {
-                                    if (Process.GetProcessesByName("javaw")[i].Modules[j].ModuleName.Contains("OpenAL"))
-                                    {
-                                        process += "javaw";
-                                        break;
-                                    }
-                                }
-                            }
+                            process += "javaw";
                         }
                         else
                         {
-                            for (int i = 0; i < Process.GetProcessesByName("java").Length; i++)
-                            {
-                                for (int j = 0; j < Process.GetProcessesByName("java")[i].Modules.Count; j++)
-                                {
-                                    if (Process.GetProcessesByName("java")[i].Modules[j].ModuleName.Contains("OpenAL"))
-                                    {
-                                        process += "java";
-                                        break;
-                                    }
-                                }
-                            }
+                            process += "java";
                         }
                     }
                 }
             }
             else if (Process.GetProcessesByName("javaw").Length > 0 && Process.GetProcessesByName("java").Length == 0)
             {
-                for (int i = 0; i < Process.GetProcessesByName("javaw").Length; i++)
-                {
-                    for (int j = 0; j < Process.GetProcessesByName("javaw")[i].Modules.Count; j++)
-                    {
-                        if (Process.GetProcessesByName("javaw")[i].Modules[j].ModuleName.Contains("OpenAL")
-                            && Process.GetProcessesByName("javaw")[i].PagedMemorySize64 > 0)
-                        {
-                            process += "javaw";
-                            break;
-                        }
-                    }
-                }
+                process += "javaw";
             }
             else if (Process.GetProcessesByName("java").Length > 0 && Process.GetProcessesByName("javaw").Length == 0)
             {
-                for (int i = 0; i < Process.GetProcessesByName("java").Length; i++)
-                {
-                    for (int j = 0; j < Process.GetProcessesByName("java")[i].Modules.Count; j++)
-                    {
-                        if (Process.GetProcessesByName("java")[i].Modules[j].ModuleName.Contains("OpenAL"))
-                        {
-                            process += "java";
-                            break;
-                        }
-                    }
-                }
+                process += "java";
             }
 
             return process;
@@ -262,8 +221,8 @@ namespace SMT.helpers
 
         public static void Loading()
         {
-            while(true)
-            { 
+            while (true)
+            {
             }
         }
 

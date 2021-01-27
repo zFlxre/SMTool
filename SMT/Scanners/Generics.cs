@@ -7,6 +7,7 @@ using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace SMT
 {
@@ -25,69 +26,83 @@ namespace SMT
 
         #endregion
 
-        public void HeuristicMCPathScan()
-        {
-            int LibrariesIO_counter = 0;
+        public static List<Task> generic_tasks = new List<Task>();
 
-            List<string> GetAll_SuspyDirectories = new List<string>();
+        #region Scan rimosso
 
-            if (Directory.Exists($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\versions"))
-            {
-                //Hidden versions + Check Main
-                foreach (string version_directory in Directory.GetDirectories($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\versions"))
-                {
-                    FileInfo fInfo = new FileInfo(version_directory);
+        //public void HeuristicMCPathScan()
+        //{
+        //    int LibrariesIO_counter = 0;
 
-                    if (fInfo.Attributes.HasFlag(System.IO.FileAttributes.Hidden))
-                    {
-                        SMT.RESULTS.HeuristicMC.Add("This folder has been hidden: " + version_directory + " please investigate");
-                    }
+        //    List<string> GetAll_SuspyDirectories = new List<string>();
 
-                    foreach (string JarFile_InVersion in Directory.GetFiles(version_directory, "*.jar"))
-                    {
-                        string File_lines = File.ReadAllText(JarFile_InVersion);
-                        if (File_lines.Contains("net/minecraft/client/main/") && File_lines.Contains(".class") && !File_lines.Contains("Main"))
-                        {
-                            SMT.RESULTS.HeuristicMC.Add("There are +3 Mains in: " + JarFile_InVersion);
-                        }
-                    }
-                }
+        //    if (Directory.Exists($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\versions"))
+        //    {
+        //        Hidden versions +Check Main
 
-                //SerenityB26, AVIX
-                foreach (string io_directory in Directory.GetDirectories($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\libraries\io"))
-                {
-                    if (io_directory.Length > 0)
-                    {
-                        ++LibrariesIO_counter;
-                        GetAll_SuspyDirectories.Add(io_directory);
-                    }
-                }
+        //        foreach (string version_directory in Directory.GetDirectories($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\versions"))
+        //        {
+        //            FileInfo fInfo = new FileInfo(version_directory);
 
-                foreach (string Single_Directory in GetAll_SuspyDirectories)
-                {
-                    if (LibrariesIO_counter > 1 && !Single_Directory.Contains("netty"))
-                    {
-                        SMT.RESULTS.HeuristicMC.Add($@"There is another directory in C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\libraries\io called {Single_Directory}");
-                    }
-                }
-                LibrariesIO_counter = 0;
-            }
-            else
-            {
-                SMT.RESULTS.HeuristicMC.Add(".minecraft folder unreachable");
-            }
+        //            if (fInfo.Attributes.HasFlag(System.IO.FileAttributes.Hidden))
+        //            {
+        //                SMT.RESULTS.HeuristicMC.Add("This folder has been hidden: " + version_directory + " please investigate");
+        //            }
 
-            try
-            {
-                if (VirtualDesktop.Desktop.Count > 1)
-                {
-                    SMT.RESULTS.HeuristicMC.Add($"There are {VirtualDesktop.Desktop.Count} virtual desktops," +
-                        $" please press Windows + TAB and investigate");
-                }
-            }
-            catch { SMT.RESULTS.HeuristicMC.Add("Virtual Desktop(s) unreachable"); }
+        //            foreach (string JarFile_InVersion in Directory.GetFiles(version_directory, "*.jar"))
+        //            {
+        //                string File_lines = File.ReadAllText(JarFile_InVersion);
+        //                if (File_lines.Contains("net/minecraft/client/main/") && File_lines.Contains(".class") && !File_lines.Contains("Main"))
+        //                {
+        //                    SMT.RESULTS.HeuristicMC.Add("There are +3 Mains in: " + JarFile_InVersion);
+        //                }
+        //            }
+        //        }
 
-        } //Refractored
+        //        SerenityB26, AVIX
+        //        foreach (string io_directory in Directory.GetDirectories($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\libraries\io"))
+        //        {
+        //            if (io_directory.Length > 0)
+        //            {
+        //                ++LibrariesIO_counter;
+        //                GetAll_SuspyDirectories.Add(io_directory);
+        //            }
+        //        }
+        //        foreach (string Single_Directory in GetAll_SuspyDirectories)
+        //        {
+        //            if (LibrariesIO_counter > 1 && !Single_Directory.Contains("netty"))
+        //            {
+        //                SMT.RESULTS.HeuristicMC.Add($@"There is another directory in C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\libraries\io called {Single_Directory}");
+        //            }
+        //        }
+        //        LibrariesIO_counter = 0;
+
+
+        //        Task.WaitAll(generic_tasks.ToArray());
+        //    }
+        //    else
+        //    {
+        //        SMT.RESULTS.HeuristicMC.Add(".minecraft folder unreachable");
+        //    }
+
+        //    var task4 = Task.Run(() =>
+        //    {
+        //        try
+        //        {
+        //            if (VirtualDesktop.Desktop.Count > 1)
+        //            {
+        //                SMT.RESULTS.HeuristicMC.Add($"There are {VirtualDesktop.Desktop.Count} virtual desktops," +
+        //                    $" please press Windows + TAB and investigate");
+        //            }
+        //        }
+        //        catch { SMT.RESULTS.HeuristicMC.Add("Virtual Desktop(s) unreachable"); }
+        //    });
+
+        //    Task.WaitAll(task4);
+
+        //} //Refractored
+
+        #endregion
 
         public void Alts_check()
         {
@@ -234,19 +249,14 @@ namespace SMT
                 string[] Get_ResourcePacks = Directory.GetFiles($@"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\resourcepacks\");
                 string ResourcePack_line = string.Empty;
 
-                foreach (string resourcePack in Get_ResourcePacks)
+                Parallel.ForEach(Get_ResourcePacks, (resourcepack) =>
                 {
-                    FileInfo finfo = new FileInfo(resourcePack);
-                    StreamReader ReadFile_line = new StreamReader(resourcePack);
-                    while ((ResourcePack_line = ReadFile_line.ReadLine()) != null)
+                    FileInfo finfo = new FileInfo(resourcepack);
+                    if(File.ReadAllText(resourcepack).Contains(".json") && finfo.Length < 1000000)
                     {
-                        if (ResourcePack_line.Contains(".json") && finfo.Length < 1000000)
-                        {
-                            SMT.RESULTS.xray_packs.Add(resourcePack);
-                            break;
-                        }
+                        SMT.RESULTS.xray_packs.Add(resourcepack);
                     }
-                }
+                });
             }
             catch { SMT.RESULTS.xray_packs.Add("Nothing Found"); }
         } //Refractored

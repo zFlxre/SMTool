@@ -79,7 +79,7 @@ namespace SMT
 
             header.Stages(0, "Looking 4 Minecraft");
 
-            if (!SMTHelper.isCorrectMC())
+            if (SMTHelper.isCorrectMC())
             {
                 #region Delete close button - ExtractFile - SaveFiles - Classes - Priority
 
@@ -107,15 +107,14 @@ namespace SMT
 
                 Action[] genericChecks = new Action[]
                 {
-                //generics.Alts_check,
-                //generics.GetXrayResourcePack,
-                //generics.checkRecordingSoftwares,
-                //generics.isVM,
-                //generics.isVPN,
-                //generics.RecycleBin_check,
-                //generics.ProcessesStartup_Check,
-                //generics.GetMouse,
-                //generics.HeuristicMCPathScan,
+                generics.Alts_check,
+                generics.GetXrayResourcePack,
+                generics.checkRecordingSoftwares,
+                generics.isVM,
+                generics.isVPN,
+                generics.RecycleBin_check,
+                generics.ProcessesStartup_Check,
+                generics.GetMouse
                 };
 
                 for (int j = 0; j < genericChecks.Length; j++)
@@ -125,10 +124,10 @@ namespace SMT
 
                 Action[] scannerChecks = new Action[]
                 {
-                    checks.HeuristicCsrssCheck,
-                    //checks.EventVwrCheck,
+                    //checks.HeuristicCsrssCheck,
+                    checks.EventVwrCheck,
                     //checks.USNJournal,
-                    //checks.OtherChecks,
+                    checks.OtherChecks,
                     //checks.StringScan,
                     //checks.isValueJournalDefault,
                 };
