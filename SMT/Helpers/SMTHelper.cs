@@ -189,7 +189,12 @@ namespace SMT.helpers
             {
                 process += "java";
             }
-
+            else if(Process.GetProcessesByName("javaw").Length == 0 
+                && Process.GetProcessesByName("java").Length == 0
+                && Process.GetProcessesByName("launcher").Length > 0)
+            {
+                process += "launcher";
+            }
             return process;
         }
 
