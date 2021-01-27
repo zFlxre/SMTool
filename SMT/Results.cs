@@ -25,5 +25,8 @@ namespace SMT
         public List<string> prefetch_files_deleted { get; set; } = new List<string>();
         public List<string> bypass_methods { get; set; } = new List<string>();
         #endregion
+
+        public List<string> Errors { get; set; } = new List<string>();
+
     }
 }

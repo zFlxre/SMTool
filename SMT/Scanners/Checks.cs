@@ -246,15 +246,15 @@ namespace SMT.scanners
                 StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
             }
 
-            if (SMTHelper.DiagTrack)
-            {
-                string file_lines = File.ReadAllText($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
+            //if (SMTHelper.DiagTrack)
+            //{
+            //    string file_lines = File.ReadAllText($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
 
-                if ((file_lines.Contains("cmd.exe") && file_lines.Contains("del") && file_lines.Contains(".pf")) || file_lines.Contains("/c ping 1.1.1.1 -n 1 -w 3000 > nul & del /f /q"))
-                {
-                    SMT.RESULTS.string_scan.Add($"Out of instance: Generic Command Line self-destruct Found!");
-                }
-            }
+            //    if ((file_lines.Contains("cmd.exe") && file_lines.Contains("del") && file_lines.Contains(".pf")) || file_lines.Contains("/c ping 1.1.1.1 -n 1 -w 3000 > nul & del /f /q"))
+            //    {
+            //        SMT.RESULTS.string_scan.Add($"Out of instance: Generic Command Line self-destruct Found!");
+            //    }
+            //}
 
         } //Refractored
 
@@ -279,19 +279,19 @@ namespace SMT.scanners
 
         public void SaveDiagTrack()
         {
-            try
-            {
-                if (SMTHelper.GetPID("DiagTrack") != " 0 ")
-                {
-                    SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
-                    SMTHelper.DiagTrack = true;
-                }
-                else
-                {
-                    SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DiagTrack process missed)");
-                }
-            }
-            catch { }
+            //try
+            //{
+            //    if (SMTHelper.GetPID("DiagTrack") != " 0 ")
+            //    {
+            //        SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
+            //        SMTHelper.DiagTrack = true;
+            //    }
+            //    else
+            //    {
+            //        SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DiagTrack process missed)");
+            //    }
+            //}
+            //catch { }
         }
 
         public void SavePcaSvc()
@@ -592,18 +592,18 @@ namespace SMT.scanners
                         SMT.RESULTS.bypass_methods.Add($@"Wmic found on: {file_missed} ({data_fiunzoa})");
                     }
                 }
-                //else if (usn_results[j].Contains("0x00000800") && usn_results[j].Contains("Prefetch"))
-                //{
-                //    Match mch = GetData.Match(usn_results[j]);
-                //    data_fiunzoa = apostrofo.Replace(mch.Value, "");
-                //    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
-                //    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+                else if (usn_results[j].Contains("0x00000800") && usn_results[j].Contains("Prefetch"))
+                {
+                    Match mch = GetData.Match(usn_results[j]);
+                    data_fiunzoa = apostrofo.Replace(mch.Value, "");
+                    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+                    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                //    if (DateToCompare >= SMTHelper.PC_StartTime())
-                //    {
-                //        SMT.RESULTS.bypass_methods.Add($@"Shitty method found (cacls) {data_fiunzoa}");
-                //    }
-                //}
+                    if (DateToCompare.AddMinutes(-2) >= SMTHelper.PC_StartTime())
+                    {
+                        SMT.RESULTS.bypass_methods.Add($@"Shitty method found (cacls) {data_fiunzoa}");
+                    }
+                }
                 else if (usn_results[j].ToUpper().Contains(".EXE"))
                 {
                     Match ExeFile = Exe_file.Match(usn_results[j].ToUpper());

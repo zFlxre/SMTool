@@ -26,7 +26,7 @@ namespace SMT
 
         private static void ThrowException()
         {
-            ConsoleHelper.WriteLine("Unexpected error, try to restart the application, if the error persists contact @SMTSupport_bot on telegram (scan skipped) \n", ConsoleColor.Red);
+            RESULTS.Errors.Add("An error occured meanwhile SMT was scanning, please restart SMT");
         }
 
         public static void runCheckAsync(Action check)
@@ -90,8 +90,8 @@ namespace SMT
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    //checks.SaveJournal,
-                    //checks.SaveJavaw,
+                    checks.SaveJournal,
+                    checks.SaveJavaw,
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -124,11 +124,11 @@ namespace SMT
 
                 Action[] scannerChecks = new Action[]
                 {
-                    //checks.HeuristicCsrssCheck,
+                    checks.HeuristicCsrssCheck,
                     checks.EventVwrCheck,
-                    //checks.USNJournal,
+                    checks.USNJournal,
                     checks.OtherChecks,
-                    //checks.StringScan,
+                    checks.StringScan,
                     //checks.isValueJournalDefault,
                 };
 
@@ -150,18 +150,18 @@ namespace SMT
                 #endregion
 
                 #region Result System Generic(s) Information (Check 1)
-                ConsoleHelper.WriteLine("[i] Generic Informations: \n", ConsoleColor.Green);
+                ConsoleHelper.WriteLine("Generic Informations: \n", ConsoleColor.Green);
 
-                ConsoleHelper.WriteLine("[i] Alts:\n", ConsoleColor.Yellow); //fatto
+                ConsoleHelper.WriteLine("Alts:\n", ConsoleColor.Yellow); //fatto
                 RESULTS.alts.ForEach(alt => ConsoleHelper.WriteLine("- " + alt));
 
-                ConsoleHelper.WriteLine("\n[i] Recycle.bin:\n", ConsoleColor.Yellow); //fatto
+                ConsoleHelper.WriteLine("\nRecycle.bin:\n", ConsoleColor.Yellow); //fatto
                 foreach (KeyValuePair<string, string> recycleBin in RESULTS.recyble_bins)
                 {
                     ConsoleHelper.WriteLine($"- {recycleBin.Value} ({recycleBin.Key})");
                 }
 
-                ConsoleHelper.WriteLine("\n[i] Recording Software(s):\n", ConsoleColor.Yellow); //fatto
+                ConsoleHelper.WriteLine("\nRecording Software(s):\n", ConsoleColor.Yellow); //fatto
                 if (RESULTS.recording_softwares.Count > 0)
                 {
                     RESULTS.recording_softwares.ForEach(recording => ConsoleHelper.WriteLine("- " + recording));
@@ -171,13 +171,13 @@ namespace SMT
                     Console.WriteLine("- No Recording Software(s) found");
                 }
 
-                ConsoleHelper.WriteLine("\n[i] Process(es) Start Time:\n", ConsoleColor.Yellow); //fatto
+                ConsoleHelper.WriteLine("\nProcess(es) Start Time:\n", ConsoleColor.Yellow); //fatto
                 foreach (KeyValuePair<string, string> processStart in RESULTS.processes_starts)
                 {
                     ConsoleHelper.WriteLine("- " + processStart.Key + processStart.Value);
                 }
 
-                ConsoleHelper.WriteLine("\n[i] Xray Resource Pack(s):\n", ConsoleColor.Yellow); //fatto
+                ConsoleHelper.WriteLine("\nXray Resource Pack(s):\n", ConsoleColor.Yellow); //fatto
                 if (RESULTS.xray_packs.Count > 0)
                 {
                     RESULTS.xray_packs.ForEach(xray => ConsoleHelper.WriteLine("- " + xray));
@@ -187,7 +187,7 @@ namespace SMT
                     Console.WriteLine("- No Xray resource pack found");
                 }
 
-                ConsoleHelper.WriteLine("\n[i] Click device(s):\n", ConsoleColor.Yellow); //fatto
+                ConsoleHelper.WriteLine("\nClick device(s):\n", ConsoleColor.Yellow); //fatto
                 if (RESULTS.mouse.Count > 0)
                 {
                     RESULTS.mouse.ForEach(mouse => ConsoleHelper.WriteLine("- Click device found with name: " + mouse));
@@ -195,12 +195,6 @@ namespace SMT
                 else
                 {
                     Console.WriteLine("- No click devices found");
-                }
-
-                if (RESULTS.HeuristicMC.Count > 0) // done
-                {
-                    ConsoleHelper.WriteLine("\n[s] .minecraft Informations:\n", ConsoleColor.Cyan);
-                    RESULTS.HeuristicMC.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
                 }
 
                 if (RESULTS.virtual_machine)
@@ -216,47 +210,52 @@ namespace SMT
 
                 #region Result System "Checks" (Check 2)
 
-                ConsoleHelper.WriteLine("\n[s] Checks:", ConsoleColor.Red);
+                ConsoleHelper.WriteLine("\nChecks:", ConsoleColor.Red);
+
+                if (RESULTS.Errors.Count > 0) // done
+                {
+                    ConsoleHelper.WriteLine("[-]An error occured meanwhile SMT was scanning, please restart SMT", ConsoleColor.Red);
+                }
 
                 if (RESULTS.generic_jnas.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Generic JNativeHook Clicker(s):\n", ConsoleColor.Cyan);
+                    ConsoleHelper.WriteLine("\nGeneric JNativeHook Clicker(s):\n", ConsoleColor.Cyan);
                     RESULTS.generic_jnas.Distinct().ToList().ForEach(jna => ConsoleHelper.WriteLine("- " + jna));
                 }
 
                 if (RESULTS.possible_replaces.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Deleted/Replaced .exe file(s):\n", ConsoleColor.Cyan);
+                    ConsoleHelper.WriteLine("\nDeleted/Replaced .exe file(s):\n", ConsoleColor.Cyan);
                     RESULTS.possible_replaces.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
                 }
 
                 if (RESULTS.prefetch_files_deleted.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Deleted Prefetch Log(s):\n", ConsoleColor.Cyan);
+                    ConsoleHelper.WriteLine("\nDeleted Prefetch Log(s):\n", ConsoleColor.Cyan);
                     RESULTS.prefetch_files_deleted.Distinct().ToList().ForEach(strscn => ConsoleHelper.WriteLine("- " + strscn));
                 }
 
                 if (RESULTS.event_viewer_entries.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Bad Eventvwr log(s):\n", ConsoleColor.Cyan);
+                    ConsoleHelper.WriteLine("\nBad Eventvwr log(s):\n", ConsoleColor.Cyan);
                     RESULTS.event_viewer_entries.Distinct().ToList().ForEach(eventvwr => ConsoleHelper.WriteLine("- " + eventvwr));
                 }
 
                 if (RESULTS.suspy_files.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Unsigned/Spoofed File(s) Check:\n", ConsoleColor.Cyan);
+                    ConsoleHelper.WriteLine("\nUnsigned/Spoofed File(s) Check:\n", ConsoleColor.Cyan);
                     RESULTS.suspy_files.Distinct().ToList().ForEach(suspy => ConsoleHelper.WriteLine("- " + suspy));
                 }
 
                 if (RESULTS.bypass_methods.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] Bypass methods:\n", ConsoleColor.Cyan);
+                    ConsoleHelper.WriteLine("\nBypass methods:\n", ConsoleColor.Cyan);
                     RESULTS.bypass_methods.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
                 }
 
                 if (RESULTS.string_scan.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\n[s] String Scan:\n", ConsoleColor.Cyan);
+                    ConsoleHelper.WriteLine("\nString Scan:\n", ConsoleColor.Cyan);
                     RESULTS.string_scan.Distinct().ToList().ForEach(strscn => ConsoleHelper.WriteLine("- " + strscn));
                 }
 
