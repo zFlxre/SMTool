@@ -92,6 +92,16 @@ namespace SMT
                 {
                     checks.SaveJournal,
                     checks.SaveJavaw,
+                    generics.Alts_check,
+                    generics.GetXrayResourcePack,
+                    generics.checkRecordingSoftwares,
+                    generics.isVM,
+                    generics.isVPN,
+                    generics.RecycleBin_check,
+                    generics.ProcessesStartup_Check,
+                    generics.GetMouse,
+                    checks.OtherChecks,
+                    checks.EventVwrCheck,
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -105,29 +115,10 @@ namespace SMT
 
                 #region Check 1 e Check 2
 
-                Action[] genericChecks = new Action[]
-                {
-                generics.Alts_check,
-                generics.GetXrayResourcePack,
-                generics.checkRecordingSoftwares,
-                generics.isVM,
-                generics.isVPN,
-                generics.RecycleBin_check,
-                generics.ProcessesStartup_Check,
-                generics.GetMouse
-                };
-
-                for (int j = 0; j < genericChecks.Length; j++)
-                {
-                    runCheckAsync(genericChecks[j]);
-                }
-
                 Action[] scannerChecks = new Action[]
                 {
                     checks.HeuristicCsrssCheck,
-                    checks.EventVwrCheck,
                     checks.USNJournal,
-                    checks.OtherChecks,
                     checks.StringScan,
                     //checks.isValueJournalDefault,
                 };

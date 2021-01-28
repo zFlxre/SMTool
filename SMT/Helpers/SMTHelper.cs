@@ -154,7 +154,7 @@ namespace SMT.helpers
 
             if (check.ExitCode != 0)
             {
-                ConsoleHelper.WriteLine("AntiSS Tool detected, please check programs in background, some checks will be skipped", ConsoleColor.Red);
+                SMT.RESULTS.Errors.Add("AntiSS Tool detected, please check programs in background, some checks will be skipped");
             }
 
             check.Close();
@@ -349,7 +349,7 @@ namespace SMT.helpers
         public static void SaveAllFiles()
         {
             Header header = new Header();
-            header.Stages(0, "SMT is loading some informations");
+            header.Stages(0, CheaterJoke());
 
             //csrss
             try
@@ -424,7 +424,6 @@ namespace SMT.helpers
             }
             catch { }
 
-            header.Stages(0, "SMT is loading some informations");
         }
     }
 }
