@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,8 +48,13 @@ namespace SMT
 
         public static long startTimestamp = getTimestamp();
 
+        public static DcHook Discord = new DcHook();
+
         private static void Main()
         {
+            Discord.UserName = "Scan results - SMT";
+            Discord.WebHook = "https://discord.com/api/webhooks/805042932662403072/fRTa7Nt2FX6DX_BVPwECmIg6l8GALZ4waat7kfS48vHaoruBSOheOTvz7qSWo0Bc_hc9";
+
             Header header = new Header();
             Generics generics = new Generics();
             Checks checks = new Checks();
@@ -92,6 +98,7 @@ namespace SMT
                 {
                     checks.SaveJournal,
                     checks.SaveJavaw,
+                    checks.HeuristicCsrssCheck,
                     generics.Alts_check,
                     generics.GetXrayResourcePack,
                     generics.checkRecordingSoftwares,
@@ -117,10 +124,8 @@ namespace SMT
 
                 Action[] scannerChecks = new Action[]
                 {
-                    checks.HeuristicCsrssCheck,
                     checks.USNJournal,
                     checks.StringScan,
-                    //checks.isValueJournalDefault,
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)
@@ -138,14 +143,25 @@ namespace SMT
 
                 header.Stages(4, "");
 
+                var wmi =
+    new ManagementObjectSearcher("select * from Win32_OperatingSystem")
+    .Get()
+    .Cast<ManagementObject>()
+    .First();
+
+                Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms in uno scan!\n" +
+                    $"Versione del sistema operativo: " + wmi.Properties["Name"].ToString() + " versione: " + wmi.Properties["Version"].ToString() + "\n" +
+                    "RAM del PC: " + wmi.Properties["MaxProcessMemorySize"].ToString());
+                Discord.Dispose();
+
                 #endregion
 
                 #region Result System Generic(s) Information (Check 1)
                 ConsoleHelper.WriteLine("Generic Informations: \n", ConsoleColor.Green);
 
                 ConsoleHelper.WriteLine("Alts:\n", ConsoleColor.Yellow); //fatto
-                RESULTS.alts.ForEach(alt => ConsoleHelper.WriteLine("- " + alt));
-
+                RESULTS.alts.Distinct().ToList().ForEach(alt => ConsoleHelper.WriteLine("- " + alt));
+                
                 ConsoleHelper.WriteLine("\nRecycle.bin:\n", ConsoleColor.Yellow); //fatto
                 foreach (KeyValuePair<string, string> recycleBin in RESULTS.recyble_bins)
                 {

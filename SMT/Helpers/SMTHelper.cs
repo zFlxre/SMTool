@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -32,6 +33,7 @@ namespace SMT.helpers
         [DllImport("user32.dll")] public static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
         [DllImport("kernel32.dll", ExactSpelling = true)] public static extern IntPtr GetConsoleWindow();
 
+        public static List<string> Csrss_files = new List<string>();
         public const int MF_BYCOMMAND = 0x00000000;
         public const int SC_CLOSE = 0xF060;
         public static Process pr = new Process();
@@ -118,15 +120,23 @@ namespace SMT.helpers
 
         public static void ExtractFile()
         {
-            Directory.CreateDirectory($@"C:\ProgramData\SMT-{SMTDir}");
+            if (Directory.Exists(@"C:\ProgramData"))
+            {
+                Directory.CreateDirectory($@"C:\ProgramData\SMT-{SMTDir}");
 
-            sigcheck = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "sigcheck.exe");
-            strings2 = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "strings2.exe");
-            unprotect = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "unprotect.exe");
+                sigcheck = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "sigcheck.exe");
+                strings2 = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "strings2.exe");
+                unprotect = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "unprotect.exe");
 
-            File.WriteAllBytes(sigcheck, Properties.Resources.sigcheck64);
-            File.WriteAllBytes(strings2, Properties.Resources.strings2);
-            File.WriteAllBytes(unprotect, Properties.Resources.unprotecting_process);
+                File.WriteAllBytes(sigcheck, Properties.Resources.sigcheck64);
+                File.WriteAllBytes(strings2, Properties.Resources.strings2);
+                File.WriteAllBytes(unprotect, Properties.Resources.unprotecting_process);
+            }
+            else
+            {
+                ConsoleHelper.WriteLine(@"C:\ProgramData directory doesn't exist, please create it and restart smt", ConsoleColor.Yellow);
+                Console.ReadLine();
+            }
         }
 
         public static bool ContainsUnicodeCharacter(string input)
@@ -355,7 +365,7 @@ namespace SMT.helpers
             try
             {
                 UnProtectProcess(Process.GetProcessesByName("csrss")[0].Id);
-                SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {Process.GetProcessesByName("csrss")[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt");
+                SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -a -pid {Process.GetProcessesByName("csrss")[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt");
             }
             catch
             {
@@ -392,37 +402,33 @@ namespace SMT.helpers
             }
             catch { }
 
-            //DNS
+            //lsass
             try
             {
-                if (GetPID("Dnscache") != " 0 ")
+                if (GetPID("lsass") != " 0 ")
                 {
-                    UnProtectProcess(Convert.ToInt32(GetPID("Dnscache")));
-                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -pid {SMTHelper.GetPID("Dnscache")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
+                    UnProtectProcess(Convert.ToInt32(GetPID("lsass")));
+                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -a -pid {SMTHelper.GetPID("lsass")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
                     DNS = true;
-                }
-                else
-                {
-                    SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DNS process missed)");
                 }
             }
             catch { }
 
             //DiagTrack
-            try
-            {
-                if (GetPID("DiagTrack") != " 0 ")
-                {
-                    UnProtectProcess(Convert.ToInt32(GetPID("DiagTrack")));
-                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
-                    DiagTrack = true;
-                }
-                else
-                {
-                    SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DiagTrack process missed)");
-                }
-            }
-            catch { }
+            //try
+            //{
+            //    if (GetPID("DiagTrack") != " 0 ")
+            //    {
+            //        UnProtectProcess(Convert.ToInt32(GetPID("DiagTrack")));
+            //        SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
+            //        DiagTrack = true;
+            //    }
+            //    else
+            //    {
+            //        SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DiagTrack process missed)");
+            //    }
+            //}
+            //catch { }
 
         }
     }

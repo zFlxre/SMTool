@@ -28,5 +28,6 @@ namespace SMT
 
         public List<string> Errors { get; set; } = new List<string>();
 
+        public List<string> Scan_Speed { get; set; } = new List<string>();
     }
 }
