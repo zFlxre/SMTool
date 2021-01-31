@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,15 +14,10 @@ namespace SMT
         public static Results RESULTS = new Results();
         public static readonly List<Task> tasks = new List<Task>();
 
-        //TODO: USNJournal buggato
-
         /// <summary>
-        /// Welcome to the SMT ScreenShare Tool source code.
-        /// @SMTool on Telegram
-        /// Developers (Telegram): @MrCreeper2010 - @doliv8 - @marco1337 - @delta9tetraidrocannabinolo (ssmath)
+        /// Welcome to our source little skidder <3 
+        /// - by MrCreeper2010
         /// </summary>
-
-        //TODO: Refractoring
 
         private static void ThrowException()
         {
@@ -96,9 +90,9 @@ namespace SMT
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    //checks.SaveJournal,
+                    checks.SaveJournal,
                     //checks.SaveJavaw,
-                    checks.HeuristicCsrssCheck,
+                    checks.HeuristicCsrssCheck, //da riguardare
                     generics.Alts_check, //funziona
                     generics.GetXrayResourcePack, //funziona
                     generics.checkRecordingSoftwares, //funziona
@@ -117,7 +111,7 @@ namespace SMT
                 }
 
                 Task.WaitAll(tasks.ToArray());
-                
+
                 //foreach(string dino in SMTHelper.Csrss_files)
                 //{
                 //    Console.WriteLine(dino);
@@ -129,16 +123,16 @@ namespace SMT
 
                 //checks.StringScan();
 
-                //Action[] scannerChecks = new Action[]
-                //{
-                //    //checks.USNJournal,
-                //    checks.StringScan,
-                //};
+                Action[] scannerChecks = new Action[]
+                {
+                    checks.USNJournal,
+                    //checks.StringScan,
+                };
 
-                //for (int j = 0; j < scannerChecks.Length; j++)
-                //{
-                //    runCheckAsync(scannerChecks[j]);
-                //}
+                for (int j = 0; j < scannerChecks.Length; j++)
+                {
+                    runCheckAsync(scannerChecks[j]);
+                }
 
                 #endregion
 
@@ -150,15 +144,16 @@ namespace SMT
 
                 header.Stages(4, "");
 
-                ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
+                //ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
 
-                foreach (ManagementObject obj in myVideoObject.Get())
-                {
-                    Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms in uno scan!\n" +
-                        "OS: " + obj["Name"] + " Versione: " + obj["DriverVersion"] +
-                        "\n RAM: " + obj["AdapterRAM"]);
-                }
+                //foreach (ManagementObject obj in myVideoObject.Get())
+                //{
+                //    Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms in uno scan!\n" +
+                //        "OS: " + obj["Name"] + " Versione: " + obj["DriverVersion"] +
+                //        "\n RAM: " + obj["AdapterRAM"]);
+                //}
 
+                Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms in uno scan!\n");
                 Discord.Dispose();
 
                 #endregion

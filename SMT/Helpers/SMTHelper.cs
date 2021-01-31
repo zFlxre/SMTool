@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AuthenticodeExaminer;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -124,11 +125,9 @@ namespace SMT.helpers
             {
                 Directory.CreateDirectory($@"C:\ProgramData\SMT-{SMTDir}");
 
-                sigcheck = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "sigcheck.exe");
                 strings2 = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "strings2.exe");
                 unprotect = Path.Combine(Path.GetFullPath($@"C:\ProgramData\SMT-{SMTDir}"), "unprotect.exe");
 
-                File.WriteAllBytes(sigcheck, Properties.Resources.sigcheck64);
                 File.WriteAllBytes(strings2, Properties.Resources.strings2);
                 File.WriteAllBytes(unprotect, Properties.Resources.unprotecting_process);
             }
@@ -268,20 +267,39 @@ namespace SMT.helpers
             return Joke;
         }
 
+        public static bool isFileInPrefetch(string file)
+        {
+            bool isFileInPrefetch = false;
+
+            if(prefetchfiles.Contains(Path.GetFileName(file)))
+            {
+                isFileInPrefetch = true;
+            }
+
+            return isFileInPrefetch;
+        }
+
         public static string GetSign(string file)
         {
             string signature = "";
 
-            Console.OutputEncoding = Encoding.UTF8;
+            var extractor = new FileInspector(file);
+            var validationResult = extractor.Validate();
 
-            pr.StartInfo.FileName = $@"C:\ProgramData\SMT-{SMTDir}\sigcheck.exe";
-            pr.StartInfo.Arguments = "/C -a -accepteula \"" + file + "\"";
-            pr.StartInfo.UseShellExecute = false;
-            pr.StartInfo.RedirectStandardOutput = true;
-            pr.Start();
-            pr.WaitForExit();
-            signature += pr.StandardOutput.ReadToEnd();
-            pr.Close();
+            switch (validationResult)
+            {
+                case SignatureCheckResult.Valid:
+                    signature = "Signed";
+                    break;
+                case SignatureCheckResult.NoSignature:
+                    signature = "Unsigned";
+                    break;
+                case SignatureCheckResult.BadDigest:
+                    signature = "Fake";
+                    break;
+                default:
+                    break;
+            }
 
             return signature;
         }
