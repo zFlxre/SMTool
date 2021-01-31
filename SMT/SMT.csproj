@@ -92,13 +92,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AuthenticodeExaminer">
-      <HintPath>..\..\..\..\..\Desktop\AuthenticodeExaminer-main\AuthenticodeExaminer-main\src\AuthenticodeExaminer\bin\Debug\net46\AuthenticodeExaminer.dll</HintPath>
+      <HintPath>..\packages\AuthenticodeExaminer.dll</HintPath>
     </Reference>
     <Reference Include="Costura, Version=4.1.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.4.1.0\lib\net40\Costura.dll</HintPath>
     </Reference>
     <Reference Include="Prefetch">
-      <HintPath>..\..\..\..\Prefetch.dll</HintPath>
+      <HintPath>..\packages\Prefetch.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />

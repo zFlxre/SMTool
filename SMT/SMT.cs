@@ -56,20 +56,14 @@ namespace SMT
             Checks checks = new Checks();
 
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
-            new Thread(() =>
-            {
-                while (true)
-                {
-                    foreach (ProcessThread processThread in Process.GetCurrentProcess().Threads)
-                    {
-                        if (processThread.ThreadState != System.Diagnostics.ThreadState.Terminated)
-                        {
-                            try
-                            {
+            new Thread(() => {
+                while (true) {
+                    foreach (ProcessThread processThread in Process.GetCurrentProcess().Threads) {
+                        if (processThread.ThreadState != System.Diagnostics.ThreadState.Terminated) {
+                            try {
                                 processThread.PriorityLevel = ThreadPriorityLevel.TimeCritical;
                             }
-                            catch
-                            {
+                            catch {
 
                             }
                         }
