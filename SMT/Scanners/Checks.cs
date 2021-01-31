@@ -10,6 +10,7 @@ using System.Management;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace SMT.scanners
 {
@@ -19,7 +20,7 @@ namespace SMT.scanners
 
         public static string[] MinecraftProcesses = new string[] { "javaw", "launcher", "AlphaAntiLeak" };
         public static bool can_scan = true;
-        
+
 
         #region EventLog(s) Global Variable(s)
         public EventLog GetSecurity_log = new EventLog("Security");
@@ -43,98 +44,143 @@ namespace SMT.scanners
 
         public void HeuristicCsrssCheck()
         {
-            string CsrssFile_line;
-            CsrssFile_line = "";
+            string[] CSRSS_file = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt");
 
-            using (StreamReader Read_CsrssFile = new StreamReader($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt"))
+            Parallel.ForEach(CSRSS_file, (index) =>
             {
-                while ((CsrssFile_line = Read_CsrssFile.ReadLine()) != null)
+                Match FullFilePath_Match = GetFullFilePath.Match(index.ToUpper());
+
+                /*
+                 * 1° Check Vape Lite/Yukio (firma digitale)
+                 * 2° Check .EXE senza firma digitale
+                 * 3° Check .DLL
+                 * 4° Check estensioni spoofate
+                 */
+
+                if (FullFilePath_Match.Success
+                    && !Directory.Exists(FullFilePath_Match.Value)
+                    && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+                    && File.Exists(FullFilePath_Match.Value))
                 {
-                    Match FullFilePath_Match = GetFullFilePath.Match(CsrssFile_line.ToUpper());
-
-                    /*
-                     * 1° Check Vape Lite/Yukio (firma digitale)
-                     * 2° Check .EXE senza firma digitale
-                     * 3° Check .DLL
-                     * 4° Check estensioni spoofate
-                     */
-
-                    if (FullFilePath_Match.Value.Length > 0
-                        && !Directory.Exists(FullFilePath_Match.Value)
-                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                        && File.Exists(FullFilePath_Match.Value))
+                    if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE")
                     {
-                        if(Path.GetExtension(FullFilePath_Match.Value) == ".EXE")
-                        {
-                            SMTHelper.Csrss_files.Add(FullFilePath_Match.Value);
-                        }
-
-                        if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                            && (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
-                            || SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Mynt SASU")))
-                        {
-                            SMT.RESULTS.suspy_files.Add("File with Generic Client's digital signature: " + FullFilePath_Match.Value);
-                        }
-                        if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                            && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned"))
-                        {
-                            for (int i = 0; i < SMTHelper.prefetchfiles.Length; i++)
-                            {
-                                if (Path.GetFileName(SMTHelper.prefetchfiles[i].ToUpper()).Contains(FullFilePath_Match.Value.ToUpper())
-                                    && File.GetLastWriteTime(SMTHelper.prefetchfiles[i].ToUpper()) >= SMTHelper.PC_StartTime())
-                                {
-                                    SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
-                                }
-                            }
-                        }
-                        if (Path.GetExtension(FullFilePath_Match.Value) == ".DLL"
-                            && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
-                        {
-                            SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
-                        }
-                        if (Path.GetExtension(FullFilePath_Match.Value) != ".CONFIG"
-                            && Path.GetExtension(FullFilePath_Match.Value) != ".CPL"
-                            && Path.GetExtension(FullFilePath_Match.Value) != ".NODE"
-                            && Path.GetExtension(FullFilePath_Match.Value) != ".MANIFEST"
-                            && Path.GetExtension(FullFilePath_Match.Value) != ".DLL"
-                            && Path.GetExtension(FullFilePath_Match.Value) != ".EXE"
-                            && File.Exists(FullFilePath_Match.Value)
-                            && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
-                        {
-                            SMT.RESULTS.suspy_files.Add($"External client found: {FullFilePath_Match.Value}");
-                        }
-                    }
-                    
-                    if (FullFilePath_Match.Value.Length > 0
-                        && !Directory.Exists(FullFilePath_Match.Value)
-                        && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                        && !File.Exists(FullFilePath_Match.Value)
-                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() == ".EXE")
-                    {
-                        for (int i = 0; i < SMTHelper.prefetchfiles.Length; i++)
-                        {
-                            if (Path.GetFileName(SMTHelper.prefetchfiles[i].ToUpper()).Contains(FullFilePath_Match.Value.ToUpper())
-                                && File.GetLastWriteTime(SMTHelper.prefetchfiles[i].ToUpper()) >= SMTHelper.PC_StartTime())
-                            {
-                                SMT.RESULTS.suspy_files.Add("File missed: " + FullFilePath_Match.Value);
-                            }
-                        }
+                        SMTHelper.Csrss_files.Add(FullFilePath_Match.Value);
                     }
 
-
-                    #region ByteArray Check
-                    //if (FullFilePath_Match.Value.Length > 0
-                    //    && !Directory.Exists(FullFilePath_Match.Value)
-                    //    && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                    //    && File.Exists(FullFilePath_Match.Value))
-                    //{
-                    //    Action GetFile_Bytes = () => SMTHelper.GetFileBytes(FullFilePath_Match.Value); ;
-                    //    SMT.runCheckAsync(GetFile_Bytes);
-                    //}
-                    #endregion
-
+                    if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        && (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
+                        || SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Mynt SASU")))
+                    {
+                        SMT.RESULTS.suspy_files.Add("File with Generic Client's digital signature: " + FullFilePath_Match.Value);
+                    }
+                    if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned"))
+                    {
+                        SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
+                    }
+                    if (Path.GetExtension(FullFilePath_Match.Value) == ".DLL"
+                        && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+                    {
+                        SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
+                    }
+                    if (Path.GetExtension(FullFilePath_Match.Value) != ".CONFIG"
+                        && Path.GetExtension(FullFilePath_Match.Value) != ".CPL"
+                        && Path.GetExtension(FullFilePath_Match.Value) != ".NODE"
+                        && Path.GetExtension(FullFilePath_Match.Value) != ".MANIFEST"
+                        && Path.GetExtension(FullFilePath_Match.Value) != ".DLL"
+                        && Path.GetExtension(FullFilePath_Match.Value) != ".EXE"
+                        && File.Exists(FullFilePath_Match.Value)
+                        && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+                    {
+                        SMT.RESULTS.suspy_files.Add($"External client found: {FullFilePath_Match.Value}");
+                    }
                 }
-            }
+
+                if (FullFilePath_Match.Value.Length > 0
+                    && !Directory.Exists(FullFilePath_Match.Value)
+                    && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+                    && !File.Exists(FullFilePath_Match.Value)
+                    && Path.GetExtension(FullFilePath_Match.Value).ToUpper() == ".EXE")
+                {
+                    SMT.RESULTS.suspy_files.Add("File missed: " + FullFilePath_Match.Value);
+                }
+            });
+
+            //using (StreamReader Read_CsrssFile = new StreamReader($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt"))
+            //{
+            //    while ((CsrssFile_line = Read_CsrssFile.ReadLine()) != null)
+            //    {
+            //        Match FullFilePath_Match = GetFullFilePath.Match(CsrssFile_line.ToUpper());
+
+            //        /*
+            //         * 1° Check Vape Lite/Yukio (firma digitale)
+            //         * 2° Check .EXE senza firma digitale
+            //         * 3° Check .DLL
+            //         * 4° Check estensioni spoofate
+            //         */
+
+            //        if (FullFilePath_Match.Value.Length > 0
+            //            && !Directory.Exists(FullFilePath_Match.Value)
+            //            && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+            //            && File.Exists(FullFilePath_Match.Value))
+            //        {
+            //            if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE")
+            //            {
+            //                SMTHelper.Csrss_files.Add(FullFilePath_Match.Value);
+            //            }
+
+            //            if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+            //                && (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
+            //                || SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Mynt SASU")))
+            //            {
+            //                SMT.RESULTS.suspy_files.Add("File with Generic Client's digital signature: " + FullFilePath_Match.Value);
+            //            }
+            //            if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+            //                && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned"))
+            //            {
+            //                SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
+            //            }
+            //            if (Path.GetExtension(FullFilePath_Match.Value) == ".DLL"
+            //                && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+            //            {
+            //                SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
+            //            }
+            //            if (Path.GetExtension(FullFilePath_Match.Value) != ".CONFIG"
+            //                && Path.GetExtension(FullFilePath_Match.Value) != ".CPL"
+            //                && Path.GetExtension(FullFilePath_Match.Value) != ".NODE"
+            //                && Path.GetExtension(FullFilePath_Match.Value) != ".MANIFEST"
+            //                && Path.GetExtension(FullFilePath_Match.Value) != ".DLL"
+            //                && Path.GetExtension(FullFilePath_Match.Value) != ".EXE"
+            //                && File.Exists(FullFilePath_Match.Value)
+            //                && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+            //            {
+            //                SMT.RESULTS.suspy_files.Add($"External client found: {FullFilePath_Match.Value}");
+            //            }
+            //        }
+
+            //        if (FullFilePath_Match.Value.Length > 0
+            //            && !Directory.Exists(FullFilePath_Match.Value)
+            //            && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+            //            && !File.Exists(FullFilePath_Match.Value)
+            //            && Path.GetExtension(FullFilePath_Match.Value).ToUpper() == ".EXE")
+            //        {
+            //            SMT.RESULTS.suspy_files.Add("File missed: " + FullFilePath_Match.Value);
+            //        }
+
+
+            #region ByteArray Check
+            //if (FullFilePath_Match.Value.Length > 0
+            //    && !Directory.Exists(FullFilePath_Match.Value)
+            //    && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+            //    && File.Exists(FullFilePath_Match.Value))
+            //{
+            //    Action GetFile_Bytes = () => SMTHelper.GetFileBytes(FullFilePath_Match.Value); ;
+            //    SMT.runCheckAsync(GetFile_Bytes);
+            //}
+            #endregion
+
+            //}
+            //}
 
             SMT.RESULTS.suspy_files.Sort();
         } //Refractored
@@ -172,21 +218,16 @@ namespace SMT.scanners
             string cheat, client_str;
 
             List<string> clientsdetected = new List<string>();
-
-            bool can_scan = true;
             ManagementClass mngmtClass = new ManagementClass("Win32_Process");
 
             foreach (ManagementObject o in mngmtClass.GetInstances())
             {
-                if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0
-                    && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.ToString().Contains("Lunar")
-                    && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.ToString().Contains("Badlion"))
+                if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0)
                 {
                     if (o["Name"].Equals(SMTHelper.MinecraftMainProcess))
                     {
                         if (o["CommandLine"].ToString().Contains(@"11.15.1.1722"))
                         {
-                            can_scan = false;
                             break;
                         }
                     }
@@ -220,8 +261,7 @@ namespace SMT.scanners
                                 SMT.RESULTS.string_scan.Add("Out of instance: " + cheat);
                             }
                             else if (link == "https://pastebin.com/raw/zh0UaeG4"
-                                && file_lines.Contains(client_str) && !cheat.Contains("Found Generic")
-                                && (can_scan == false || can_scan))
+                                && file_lines.Contains(client_str) && !cheat.Contains("Found Generic"))
                             {
                                 SMT.RESULTS.string_scan.Add("In instance: " + cheat);
                             }
@@ -240,21 +280,23 @@ namespace SMT.scanners
 
         public void StringScan()
         {
-            if (SMTHelper.DPS)
-            {
-                StringScannerSystem("https://pastebin.com/raw/YtQUM50C", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
-            }
+            //if (SMTHelper.DPS)
+            //{
+            StringScannerSystem("https://pastebin.com/raw/YtQUM50C", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
+            //}
 
-            if (SMTHelper.DNS)
-            {
-                StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
-            }
+            //if (SMTHelper.DNS)
+            //{
+            StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
+            //}
 
-            if (SMTHelper.Javaw
-                && !Process.GetProcessesByName("javaw")[0].MainWindowTitle.Contains("Badlion Client"))
-            {
-                StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
-            }
+            //if (SMTHelper.Javaw
+            //    && !Process.GetProcessesByName("javaw")[0].MainWindowTitle.Contains("Badlion Client"))
+            //{
+            StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
+            //}
+
+            Console.WriteLine("Reached!");
 
             //if (SMTHelper.DiagTrack)
             //{
@@ -270,9 +312,8 @@ namespace SMT.scanners
 
         public void SaveJavaw()
         {
-            if (can_scan && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0
-                && !Process.GetProcessesByName("javaw")[0].MainWindowTitle.Contains("Badlion Client")
-                && !Process.GetProcessesByName("java")[0].MainWindowTitle.Contains("Badlion Client"))
+            if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0
+                && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.Contains("Badlion Client"))
             {
                 SMTHelper.UnProtectProcess(Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id);
                 SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -a -pid {Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
@@ -282,7 +323,7 @@ namespace SMT.scanners
 
         public void SaveJournal()
         {
-            if (can_scan && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0)
+            if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0)
             {
                 SMTHelper.SaveFile("fsutil usn readjournal c: csv | findstr /i /C:\"" + "0x80000200" + "\"" + " /C:\"" + "0x00001000" + "\"" + " /C:\"" + "0x80200120" + "\"" + " /C:\"" + "0x00000800" + "\"" + $@" > C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
                 SMTHelper.Javaw = true;
@@ -339,22 +380,22 @@ namespace SMT.scanners
             catch { }
         }
 
-        public void SaveDPS()
-        {
-            try
-            {
-                if (SMTHelper.GetPID("DPS") != " 0 ")
-                {
-                    SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 19 -pid {SMTHelper.GetPID("DPS")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
-                    SMTHelper.DPS = true;
-                }
-                else
-                {
-                    SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DPS process missed)");
-                }
-            }
-            catch { }
-        }
+        //public void SaveDPS()
+        //{
+        //    try
+        //    {
+        //        if (SMTHelper.GetPID("DPS") != " 0 ")
+        //        {
+        //            SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 19 -pid {SMTHelper.GetPID("DPS")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
+        //            SMTHelper.DPS = true;
+        //        }
+        //        else
+        //        {
+        //            SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DPS process missed)");
+        //        }
+        //    }
+        //    catch { }
+        //}
 
         public void EventVwrCheck()
         {
@@ -562,7 +603,6 @@ namespace SMT.scanners
 
             string[] usn_results = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
             string file_missed = "";
-            string data_fiunzoa = "";
 
             for (int j = 0; j < usn_results.Length; j++)
             {

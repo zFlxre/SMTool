@@ -96,19 +96,19 @@ namespace SMT
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    checks.SaveJournal,
-                    checks.SaveJavaw,
+                    //checks.SaveJournal,
+                    //checks.SaveJavaw,
                     checks.HeuristicCsrssCheck,
-                    generics.Alts_check,
-                    generics.GetXrayResourcePack,
-                    generics.checkRecordingSoftwares,
-                    generics.isVM,
-                    generics.isVPN,
-                    generics.RecycleBin_check,
-                    generics.ProcessesStartup_Check,
-                    generics.GetMouse,
-                    checks.OtherChecks,
-                    checks.EventVwrCheck,
+                    generics.Alts_check, //funziona
+                    generics.GetXrayResourcePack, //funziona
+                    generics.checkRecordingSoftwares, //funziona
+                    generics.isVM, //idk
+                    generics.isVPN, //idk
+                    generics.RecycleBin_check, //funziona
+                    generics.ProcessesStartup_Check, //funziona
+                    generics.GetMouse, //funziona
+                    checks.OtherChecks, //funziona
+                    checks.EventVwrCheck, //idk
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -117,21 +117,28 @@ namespace SMT
                 }
 
                 Task.WaitAll(tasks.ToArray());
-
+                
+                //foreach(string dino in SMTHelper.Csrss_files)
+                //{
+                //    Console.WriteLine(dino);
+                //}
+                //Console.ReadLine();
                 #endregion
 
                 #region Check 1 e Check 2
 
-                Action[] scannerChecks = new Action[]
-                {
-                    checks.USNJournal,
-                    checks.StringScan,
-                };
+                //checks.StringScan();
 
-                for (int j = 0; j < scannerChecks.Length; j++)
-                {
-                    runCheckAsync(scannerChecks[j]);
-                }
+                //Action[] scannerChecks = new Action[]
+                //{
+                //    //checks.USNJournal,
+                //    checks.StringScan,
+                //};
+
+                //for (int j = 0; j < scannerChecks.Length; j++)
+                //{
+                //    runCheckAsync(scannerChecks[j]);
+                //}
 
                 #endregion
 
@@ -143,15 +150,15 @@ namespace SMT
 
                 header.Stages(4, "");
 
-                var wmi =
-    new ManagementObjectSearcher("select * from Win32_OperatingSystem")
-    .Get()
-    .Cast<ManagementObject>()
-    .First();
+                ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
 
-                Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms in uno scan!\n" +
-                    $"Versione del sistema operativo: " + wmi.Properties["Name"].ToString() + " versione: " + wmi.Properties["Version"].ToString() + "\n" +
-                    "RAM del PC: " + wmi.Properties["MaxProcessMemorySize"].ToString());
+                foreach (ManagementObject obj in myVideoObject.Get())
+                {
+                    Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms in uno scan!\n" +
+                        "OS: " + obj["Name"] + " Versione: " + obj["DriverVersion"] +
+                        "\n RAM: " + obj["AdapterRAM"]);
+                }
+
                 Discord.Dispose();
 
                 #endregion
@@ -161,7 +168,7 @@ namespace SMT
 
                 ConsoleHelper.WriteLine("Alts:\n", ConsoleColor.Yellow); //fatto
                 RESULTS.alts.Distinct().ToList().ForEach(alt => ConsoleHelper.WriteLine("- " + alt));
-                
+
                 ConsoleHelper.WriteLine("\nRecycle.bin:\n", ConsoleColor.Yellow); //fatto
                 foreach (KeyValuePair<string, string> recycleBin in RESULTS.recyble_bins)
                 {

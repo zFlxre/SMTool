@@ -365,7 +365,7 @@ namespace SMT.helpers
             try
             {
                 UnProtectProcess(Process.GetProcessesByName("csrss")[0].Id);
-                SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -a -pid {Process.GetProcessesByName("csrss")[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt");
+                SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 4 -pid {Process.GetProcessesByName("csrss")[0].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
             }
             catch
             {
@@ -405,10 +405,10 @@ namespace SMT.helpers
             //lsass
             try
             {
-                if (GetPID("lsass") != " 0 ")
+                if (Process.GetProcessesByName("lsass")[0].Id > 0)
                 {
-                    UnProtectProcess(Convert.ToInt32(GetPID("lsass")));
-                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -a -pid {SMTHelper.GetPID("lsass")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
+                    UnProtectProcess(Convert.ToInt32(Process.GetProcessesByName("lsass")[0].Id));
+                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 6 -a -pid {Process.GetProcessesByName("lsass")[0].Id} > C:\ProgramData\SMT-{SMTDir}\Browser.txt");
                     DNS = true;
                 }
             }
