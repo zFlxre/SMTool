@@ -8,3 +8,5 @@ C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\bin\x64\Release\SMT.
 C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Release\SMT.exe
 C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Release\SMT.pdb
 C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Release\SMT.csproj.Fody.CopyLocal.cache
+C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\bin\x64\Release\AuthenticodeExaminer.xml
+C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Release\SMT.csproj.CopyComplete

@@ -177,14 +177,14 @@ namespace SMT
                 "recorder"
             };
 
-            foreach (string recordingProcess in recordingprocesses)
+            Parallel.ForEach(recordingprocesses, (index) =>
             {
-                if (Process.GetProcessesByName(recordingProcess).Length != 0)
+                if (Process.GetProcessesByName(index).Length != 0)
                 {
-                    SMT.RESULTS.recording_softwares.Add(recordingProcess);
+                    SMT.RESULTS.recording_softwares.Add(index);
                     recordingProcessesFound++;
                 }
-            }
+            });
 
         } //Refractored
 

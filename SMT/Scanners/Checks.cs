@@ -68,7 +68,7 @@ namespace SMT.scanners
                         SMTHelper.Csrss_files.Add(FullFilePath_Match.Value);
                     }
 
-                    if(Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                    if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
                         && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Fake"))
                     {
                         SMT.RESULTS.suspy_files.Add("Not valid digital sign on: " + FullFilePath_Match.Value + " maybe fake?");
@@ -222,7 +222,7 @@ namespace SMT.scanners
         {
             //StringScanner system by GabTeix (https://github.com/GabTeix) (project removed)
 
-            string[] file_lines = File.ReadAllLines(result);
+            string file_lines = File.ReadAllText(result, Encoding.Default);
 
             WebClient client = new WebClient();
             string cheat, client_str;
@@ -238,6 +238,7 @@ namespace SMT.scanners
                     {
                         if (o["CommandLine"].ToString().Contains(@"11.15.1.1722"))
                         {
+                            can_scan = false;
                             break;
                         }
                     }
@@ -271,7 +272,9 @@ namespace SMT.scanners
                                 SMT.RESULTS.string_scan.Add("Out of instance: " + cheat);
                             }
                             else if (link == "https://pastebin.com/raw/zh0UaeG4"
-                                && file_lines.Contains(client_str) && !cheat.Contains("Found Generic"))
+                                && can_scan
+                                && file_lines.Contains(client_str)
+                                && !cheat.Contains("Found Generic"))
                             {
                                 SMT.RESULTS.string_scan.Add("In instance: " + cheat);
                             }
@@ -280,7 +283,7 @@ namespace SMT.scanners
                 }
             }
 
-            file_lines = new string[] { };
+            //file_lines = new string[] { };
 
             for (int j = 0; j < clientsdetected.Count; j++)
             {
@@ -290,21 +293,21 @@ namespace SMT.scanners
 
         public void StringScan()
         {
-            //if (SMTHelper.DPS)
-            //{
-            StringScannerSystem("https://pastebin.com/raw/YtQUM50C", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
-            //}
+            if (SMTHelper.DPS)
+            {
+                StringScannerSystem("https://pastebin.com/raw/YtQUM50C", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
+            }
 
-            //if (SMTHelper.DNS)
-            //{
-            StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
-            //}
+            if (SMTHelper.DNS)
+            {
+                StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
+            }
 
-            //if (SMTHelper.Javaw
-            //    && !Process.GetProcessesByName("javaw")[0].MainWindowTitle.Contains("Badlion Client"))
-            //{
-            StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
-            //}
+            if (SMTHelper.Javaw
+                && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.Contains("Badlion Client"))
+            {
+                StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
+            }
 
             Console.WriteLine("Reached!");
 
@@ -652,7 +655,6 @@ namespace SMT.scanners
             Regex Exe_file = new Regex(",\".*?\",");
             Regex virgole = new Regex(",");
             Regex apostrofo = new Regex("\"");
-            Regex Get_Wmic = new Regex(",\".*?\",");
             Regex JNativeHook_file = new Regex("JNATIVEHOOK.*?DLL");
             Regex GetData = new Regex("\",\".*?\",");
 
@@ -661,153 +663,241 @@ namespace SMT.scanners
             #endregion
 
             string[] usn_results = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
-            string file_missed = "";
             string data_fiunzoa = "";
+            string file_missed = "";
 
             Parallel.ForEach(usn_results, (index) =>
             {
-                if(index.Contains("0x80000200") && index.ToUpper().Contains(".EXE"))
-                {
-                    Match GetFile_match = Exe_file.Match(index.ToUpper());
-                    file_missed = virgole.Replace(GetFile_match.Value, "");
-                    file_missed = apostrofo.Replace(file_missed, "");
+                /*
+                 * Eliminati
+                 * Wmic
+                 * Moved/Renamed
+                 * JNativeHook
+                 * .PF
+                 */
 
+                if (index.ToUpper().Contains(".EXE") && !index.ToUpper().Contains(".PF") && index.Contains("0x80000200"))
+                {
                     Match mch = GetData.Match(index);
                     data_fiunzoa = apostrofo.Replace(mch.Value, "");
                     data_fiunzoa = virgole.Replace(data_fiunzoa, "");
                     DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                    //if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
-                    //{
-                        SMT.RESULTS.possible_replaces.Add($"{file_missed} was moved/renamed (File data: {data_fiunzoa} Javaw: {Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime})");
-                    //}
+                    if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
+                    {
+                        Match GetFile_match = Exe_file.Match(index.ToUpper());
+
+                        if (GetFile_match.Success)
+                        {
+                            file_missed = virgole.Replace(GetFile_match.Value, "");
+                            file_missed = apostrofo.Replace(file_missed, "");
+
+                            if (Path.GetExtension(file_missed).ToUpper() == ".EXE")
+                            {
+                                SMT.RESULTS.possible_replaces.Add($"{file_missed} deleted after Minecraft ({data_fiunzoa})");
+                            }
+                        }
+                    }
                 }
-                //if (index.Contains("0x00001000")
-                //    && (index.ToUpper().Contains("JNATIVEHOOK")
-                //    || index.ToUpper().Contains(".PF")
-                //    || index.ToUpper().Contains(".EXE")))
-                //{
-                //    Match GetFile_match = Exe_file.Match(index.ToUpper());
-                //    file_missed = virgole.Replace(GetFile_match.Value, "");
-                //    file_missed = apostrofo.Replace(file_missed, "");
+                if (index.Contains("0x80200120"))
+                {
+                    Match mch = GetData.Match(index);
+                    data_fiunzoa = apostrofo.Replace(mch.Value, "");
+                    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+                    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                //    Match mch = GetData.Match(index);
-                //    data_fiunzoa = apostrofo.Replace(mch.Value, "");
-                //    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
-                //    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+                    if (SMTHelper.PC_StartTime() <= DateToCompare)
+                    {
+                        Match GetFile_match = Exe_file.Match(index.ToUpper());
 
-                //    if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
-                //    {
-                //        SMT.RESULTS.possible_replaces.Add($"{file_missed} was moved/renamed ({data_fiunzoa})");
-                //    }
-                //}
+                        if (GetFile_match.Success)
+                        {
+                            file_missed = virgole.Replace(GetFile_match.Value, "");
+                            file_missed = apostrofo.Replace(file_missed, "");
+
+                            if (Path.GetExtension(file_missed).Length > 0)
+                            {
+                                SMT.RESULTS.bypass_methods.Add($"Wmic method found: {file_missed} ({data_fiunzoa})");
+                            }
+                        }
+                    }
+                }
+                if (index.ToUpper().Contains(".EXE") && index.Contains("0x00001000"))
+                {
+                    Match mch = GetData.Match(index);
+                    data_fiunzoa = apostrofo.Replace(mch.Value, "");
+                    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+                    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+
+                    if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
+                    {
+                        Match GetFile_match = Exe_file.Match(index.ToUpper());
+
+                        if (GetFile_match.Success)
+                        {
+                            file_missed = virgole.Replace(GetFile_match.Value, "");
+                            file_missed = apostrofo.Replace(file_missed, "");
+
+                            if (Path.GetExtension(file_missed).ToUpper() == ".EXE")
+                            {
+                                SMT.RESULTS.possible_replaces.Add($"{file_missed} moved/renamed after Minecraft ({data_fiunzoa})");
+                            }
+                        }
+                    }
+                }
+                if (index.ToUpper().Contains("JNATIVEHOOK") && index.Contains("0x80000200"))
+                {
+                    Match mch = GetData.Match(index);
+                    data_fiunzoa = apostrofo.Replace(mch.Value, "");
+                    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+                    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+
+                    if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
+                    {
+                        Match GetFile_match = Exe_file.Match(index.ToUpper());
+
+                        if (GetFile_match.Success)
+                        {
+                            file_missed = virgole.Replace(GetFile_match.Value, "");
+                            file_missed = apostrofo.Replace(file_missed, "");
+
+                            if (Path.GetExtension(file_missed).ToUpper() == ".DLL")
+                            {
+                                SMT.RESULTS.generic_jnas.Add("Generic JNativeHook clicker found (deleted)");
+                            }
+                        }
+                    }
+                }
+                if (index.ToUpper().Contains(".EXE") && index.ToUpper().Contains(".PF") && index.Contains("0x80000200"))
+                {
+                    Match mch = GetData.Match(index);
+                    data_fiunzoa = apostrofo.Replace(mch.Value, "");
+                    data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+                    DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+
+                    if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
+                    {
+                        Match GetFile_match = Exe_file.Match(index.ToUpper());
+
+                        if (GetFile_match.Success)
+                        {
+                            file_missed = virgole.Replace(GetFile_match.Value, "");
+                            file_missed = apostrofo.Replace(file_missed, "");
+
+                            if (Path.GetExtension(file_missed).ToUpper() == ".PF")
+                            {
+                                SMT.RESULTS.prefetch_files_deleted.Add("Prefetch value deleted after Minecraft " + file_missed + $" ({data_fiunzoa})");
+                            }
+                        }
+                    }
+                }
             });
 
-                //for (int j = 0; j < usn_results.Length; j++)
-                //{
-                //    /*
-                //     *  1° Rinominazione
-                //     *  2° Wmic
-                //     *  3° Deleted .exe
-                //     *  4° Deleted .pf
-                //     *  5° Deleted JNativeHook
-                //     */
+            //for (int j = 0; j < usn_results.Length; j++)
+            //{
+            //    /*
+            //     *  1° Rinominazione
+            //     *  2° Wmic
+            //     *  3° Deleted .exe
+            //     *  4° Deleted .pf
+            //     *  5° Deleted JNativeHook
+            //     */
 
-                //    if (usn_results[j].Contains("0x00001000")
-                //        && (usn_results[j].ToUpper().Contains("JNATIVEHOOK")
-                //        || usn_results[j].ToUpper().Contains(".PF")
-                //        || usn_results[j].ToUpper().Contains(".EXE")))
-                //    {
-                //        Match GetFile_match = Exe_file.Match(usn_results[j].ToUpper());
-                //        file_missed = virgole.Replace(GetFile_match.Value, "");
-                //        file_missed = apostrofo.Replace(file_missed, "");
+            //    if (usn_results[j].Contains("0x00001000")
+            //        && (usn_results[j].ToUpper().Contains("JNATIVEHOOK")
+            //        || usn_results[j].ToUpper().Contains(".PF")
+            //        || usn_results[j].ToUpper().Contains(".EXE")))
+            //    {
+            //        Match GetFile_match = Exe_file.Match(usn_results[j].ToUpper());
+            //        file_missed = virgole.Replace(GetFile_match.Value, "");
+            //        file_missed = apostrofo.Replace(file_missed, "");
 
-                //        Match mch = GetData.Match(usn_results[j]);
-                //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
-                //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
-                //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+            //        Match mch = GetData.Match(usn_results[j]);
+            //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
+            //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+            //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                //        if (Path.GetExtension(file_missed).ToUpper() == ".EXE" && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
-                //        {
-                //            SMT.RESULTS.possible_replaces.Add($"{file_missed} was moved/renamed ({data_fiunzoa})");
-                //        }
-                //    }
-                //    if (usn_results[j].Contains("0x80200120"))
-                //    {
-                //        Match GetWmicFile = Get_Wmic.Match(usn_results[j].ToUpper());
-                //        file_missed = virgole.Replace(GetWmicFile.Value, "");
-                //        file_missed = apostrofo.Replace(file_missed, "");
+            //        if (Path.GetExtension(file_missed).ToUpper() == ".EXE" && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
+            //        {
+            //            SMT.RESULTS.possible_replaces.Add($"{file_missed} was moved/renamed ({data_fiunzoa})");
+            //        }
+            //    }
+            //    if (usn_results[j].Contains("0x80200120"))
+            //    {
+            //        Match GetWmicFile = Get_Wmic.Match(usn_results[j].ToUpper());
+            //        file_missed = virgole.Replace(GetWmicFile.Value, "");
+            //        file_missed = apostrofo.Replace(file_missed, "");
 
-                //        Match mch = GetData.Match(usn_results[j]);
-                //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
-                //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
-                //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+            //        Match mch = GetData.Match(usn_results[j]);
+            //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
+            //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+            //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                //        if (DateToCompare >= SMTHelper.PC_StartTime())
-                //        {
-                //            SMT.RESULTS.bypass_methods.Add($@"Wmic found on: {file_missed} ({data_fiunzoa})");
-                //        }
-                //    }
-                //    if (usn_results[j].ToUpper().Contains(".EXE")
-                //        && !usn_results[j].ToUpper().Contains(".PF")
-                //        && !usn_results[j].ToUpper().Contains("-")
-                //        && usn_results[j].ToUpper().Contains("0x80000200"))
-                //    {
-                //        Match ExeFile = Exe_file.Match(usn_results[j].ToUpper());
-                //        file_missed = virgole.Replace(ExeFile.Value, "");
-                //        file_missed = apostrofo.Replace(file_missed, "");
+            //        if (DateToCompare >= SMTHelper.PC_StartTime())
+            //        {
+            //            SMT.RESULTS.bypass_methods.Add($@"Wmic found on: {file_missed} ({data_fiunzoa})");
+            //        }
+            //    }
+            //    if (usn_results[j].ToUpper().Contains(".EXE")
+            //        && !usn_results[j].ToUpper().Contains(".PF")
+            //        && !usn_results[j].ToUpper().Contains("-")
+            //        && usn_results[j].ToUpper().Contains("0x80000200"))
+            //    {
+            //        Match ExeFile = Exe_file.Match(usn_results[j].ToUpper());
+            //        file_missed = virgole.Replace(ExeFile.Value, "");
+            //        file_missed = apostrofo.Replace(file_missed, "");
 
-                //        Match mch = GetData.Match(usn_results[j]);
-                //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
-                //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
-                //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+            //        Match mch = GetData.Match(usn_results[j]);
+            //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
+            //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+            //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                //        if (Path.GetExtension(file_missed).ToUpper() == ".EXE" && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
-                //        {
-                //            SMT.RESULTS.possible_replaces.Add($"{file_missed} deleted after Minecraft start ({data_fiunzoa})");
-                //        }
-                //    }
+            //        if (Path.GetExtension(file_missed).ToUpper() == ".EXE" && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
+            //        {
+            //            SMT.RESULTS.possible_replaces.Add($"{file_missed} deleted after Minecraft start ({data_fiunzoa})");
+            //        }
+            //    }
 
-                //    if (usn_results[j].ToUpper().Contains(".PF")
-                //        && usn_results[j].ToUpper().Contains("0x80000200"))
-                //    {
-                //        Match GetFile_match = GetCorrect_file.Match(usn_results[j].ToUpper());
-                //        file_missed = virgole.Replace(GetFile_match.Value, "");
-                //        file_missed = apostrofo.Replace(file_missed, "");
+            //    if (usn_results[j].ToUpper().Contains(".PF")
+            //        && usn_results[j].ToUpper().Contains("0x80000200"))
+            //    {
+            //        Match GetFile_match = GetCorrect_file.Match(usn_results[j].ToUpper());
+            //        file_missed = virgole.Replace(GetFile_match.Value, "");
+            //        file_missed = apostrofo.Replace(file_missed, "");
 
-                //        Match mch = GetData.Match(usn_results[j]);
-                //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
-                //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
-                //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+            //        Match mch = GetData.Match(usn_results[j]);
+            //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
+            //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+            //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                //        if (Path.GetExtension(file_missed).ToUpper() == ".PF"
-                //            && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
-                //        {
-                //            SMT.RESULTS.prefetch_files_deleted.Add($"{file_missed} deleted from prefetch ({data_fiunzoa})");
-                //        }
-                //    }
+            //        if (Path.GetExtension(file_missed).ToUpper() == ".PF"
+            //            && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
+            //        {
+            //            SMT.RESULTS.prefetch_files_deleted.Add($"{file_missed} deleted from prefetch ({data_fiunzoa})");
+            //        }
+            //    }
 
-                //    if (usn_results[j].ToUpper().Contains("JNATIVEHOOK")
-                //        && usn_results[j].ToUpper().Contains("0x80000200"))
-                //    {
-                //        Match GetFile_match = JNativeHook_file.Match(usn_results[j].ToUpper());
-                //        file_missed = virgole.Replace(GetFile_match.Value, "");
-                //        file_missed = apostrofo.Replace(file_missed, "");
+            //    if (usn_results[j].ToUpper().Contains("JNATIVEHOOK")
+            //        && usn_results[j].ToUpper().Contains("0x80000200"))
+            //    {
+            //        Match GetFile_match = JNativeHook_file.Match(usn_results[j].ToUpper());
+            //        file_missed = virgole.Replace(GetFile_match.Value, "");
+            //        file_missed = apostrofo.Replace(file_missed, "");
 
-                //        Match mch = GetData.Match(usn_results[j]);
-                //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
-                //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
-                //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
+            //        Match mch = GetData.Match(usn_results[j]);
+            //        data_fiunzoa = apostrofo.Replace(mch.Value, "");
+            //        data_fiunzoa = virgole.Replace(data_fiunzoa, "");
+            //        DateTime DateToCompare = DateTime.Parse(data_fiunzoa);
 
-                //        if (Path.GetExtension(file_missed).ToUpper() == ".DLL"
-                //            && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
-                //        {
-                //            SMT.RESULTS.generic_jnas.Add($"Generic JnativeHook clicker found (deleted)");
-                //        }
-                //    }
-                //}
+            //        if (Path.GetExtension(file_missed).ToUpper() == ".DLL"
+            //            && Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime <= DateToCompare)
+            //        {
+            //            SMT.RESULTS.generic_jnas.Add($"Generic JnativeHook clicker found (deleted)");
+            //        }
+            //    }
+            //}
 
-                for (int j = 0; j < GetTemp_files.Length; j++)
+            for (int j = 0; j < GetTemp_files.Length; j++)
             {
                 if (GetTemp_files[j].ToUpper().Contains("JNATIVEHOOK")
                     && GetTemp_files[j].ToUpper().Contains(".DLL")
@@ -815,7 +905,7 @@ namespace SMT.scanners
                 {
                     SMT.RESULTS.generic_jnas.Add("Generic JNativeHook clicker found");
                 }
-            } //Refractored
+            }
         }
     }
 }

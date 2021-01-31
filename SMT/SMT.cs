@@ -1,9 +1,11 @@
-﻿using SMT.helpers;
+﻿using Microsoft.Win32;
+using SMT.helpers;
 using SMT.scanners;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -88,11 +90,14 @@ namespace SMT
                 SMTHelper.ExtractFile();
                 SMTHelper.SaveAllFiles();
 
+                //SMTHelper.getOperatingSystemInfo();
+                //SMTHelper.getProcessorInfo();
+
                 Action[] SaveAllFiles = new Action[]
                 {
-                    checks.SaveJournal,
-                    //checks.SaveJavaw,
-                    checks.HeuristicCsrssCheck, //da riguardare
+                    checks.SaveJournal, //funziona
+                    checks.SaveJavaw, //funziona
+                    checks.HeuristicCsrssCheck, //flag files di sistema (senza firma digitale)
                     generics.Alts_check, //funziona
                     generics.GetXrayResourcePack, //funziona
                     generics.checkRecordingSoftwares, //funziona
@@ -102,7 +107,7 @@ namespace SMT
                     generics.ProcessesStartup_Check, //funziona
                     generics.GetMouse, //funziona
                     checks.OtherChecks, //funziona
-                    checks.EventVwrCheck, //idk
+                    checks.EventVwrCheck, //funziona
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -112,21 +117,14 @@ namespace SMT
 
                 Task.WaitAll(tasks.ToArray());
 
-                //foreach(string dino in SMTHelper.Csrss_files)
-                //{
-                //    Console.WriteLine(dino);
-                //}
-                //Console.ReadLine();
                 #endregion
 
                 #region Check 1 e Check 2
 
-                //checks.StringScan();
-
                 Action[] scannerChecks = new Action[]
                 {
-                    checks.USNJournal,
-                    //checks.StringScan,
+                    checks.USNJournal, //funziona
+                    checks.StringScan, //funziona
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)
@@ -144,16 +142,42 @@ namespace SMT
 
                 header.Stages(4, "");
 
-                //ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
+                RegistryKey processor_name = Registry.LocalMachine.OpenSubKey(@"Hardware\Description\System\CentralProcessor\0", RegistryKeyPermissionCheck.ReadSubTree);   //This registry entry contains entry for processor info.
 
-                //foreach (ManagementObject obj in myVideoObject.Get())
-                //{
-                //    Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms in uno scan!\n" +
-                //        "OS: " + obj["Name"] + " Versione: " + obj["DriverVersion"] +
-                //        "\n RAM: " + obj["AdapterRAM"]);
-                //}
+                if (processor_name != null)
+                {
+                    if (processor_name.GetValue("ProcessorNameString") != null)
+                    {
+                        ManagementObjectSearcher mos = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
+                        ManagementObjectSearcher search = new ManagementObjectSearcher("Select * From Win32_PhysicalMemory");
 
-                Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms in uno scan!\n");
+                        ulong total = 0;
+
+                        foreach (ManagementObject ram in search.Get())
+                        {
+                            total += (ulong)ram.GetPropertyValue("Capacity");
+                        }
+
+                        foreach (ManagementObject managementObject in mos.Get())
+                        {
+                            Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp)/1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00/60}m) in uno scan!\n" +
+                            $"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
+                            $"Processore: {processor_name.GetValue("ProcessorNameString")} \n" +
+                            $"OS: {managementObject["Caption"]} \n" +
+                            $"RAM: {total / 1073741824}GB \n" +
+                            $"Errors: {RESULTS.Errors.Count} \n" +
+                            $"\n--------- Checks Count --------- \n\n" +
+                            $"JNativeHook: {RESULTS.generic_jnas.Count} \n" +
+                            $"Suspy Files: {RESULTS.suspy_files.Count} \n" +
+                            $"String scan: {RESULTS.string_scan.Count} \n" +
+                            $"Prefetch files deleted: {RESULTS.prefetch_files_deleted.Count} \n" +
+                            $"Bypass method(s): {RESULTS.bypass_methods.Count} \n" +
+                            $"EventVwr: {RESULTS.event_viewer_entries.Count}");
+                            break;
+                        }
+                    }
+                }
+
                 Discord.Dispose();
 
                 #endregion
@@ -295,6 +319,7 @@ namespace SMT
 
                 ConsoleHelper.WriteLine("Minecraft missed, press enter to exit", ConsoleColor.Yellow);
                 Console.ReadLine();
+                Environment.Exit(0);
             }
         }
     }

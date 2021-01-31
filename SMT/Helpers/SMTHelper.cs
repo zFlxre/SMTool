@@ -1,9 +1,11 @@
 ﻿using AuthenticodeExaminer;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -12,19 +14,6 @@ using System.Threading;
 
 namespace SMT.helpers
 {
-
-    //[StructLayout(LayoutKind.Sequential)]
-    //public struct FileReparseTagInformation
-    //{
-    //    public long FileReferenceNumber;
-    //    public ReparseTag Tag;
-    //}
-
-    //public struct FileData
-    //{
-    //    public string FileName;
-    //    public ReparseBuffer Reparse;
-    //}
     public class SMTHelper
     {
         #region Variables
@@ -80,6 +69,38 @@ namespace SMT.helpers
             return DateTime.Parse(data_fiunzoa);
         }
 
+        public static void getOperatingSystemInfo()
+        {
+            ManagementObjectSearcher mos = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
+            foreach (ManagementObject managementObject in mos.Get())
+            {
+                if (managementObject["Caption"] != null)
+                {
+                    SMT.Discord.SendMessage("Operating System Name  :  " + managementObject["Caption"].ToString());   //Display operating system caption
+                }
+                if (managementObject["OSArchitecture"] != null)
+                {
+                    SMT.Discord.SendMessage("Operating System Architecture  :  " + managementObject["OSArchitecture"].ToString());   //Display operating system architecture.
+                }
+                if (managementObject["CSDVersion"] != null)
+                {
+                    SMT.Discord.SendMessage("Operating System Service Pack   :  " + managementObject["CSDVersion"].ToString());     //Display operating system version.
+                }
+            }
+        }
+
+        public static void getProcessorInfo()
+        {
+            RegistryKey processor_name = Registry.LocalMachine.OpenSubKey(@"Hardware\Description\System\CentralProcessor\0", RegistryKeyPermissionCheck.ReadSubTree);   //This registry entry contains entry for processor info.
+
+            if (processor_name != null)
+            {
+                if (processor_name.GetValue("ProcessorNameString") != null)
+                {
+                    SMT.Discord.SendMessage(processor_name.GetValue("ProcessorNameString").ToString());   //Display processor ingo.
+                }
+            }
+        }
         public static string GetPID(string process)
         {
             string finalpid = "";

@@ -2,8 +2,7 @@
   "ExpandedNodes": [
     "",
     "\\SMT",
-    "\\SMT\\bin",
-    "\\SMT\\obj"
+    "\\SMT\\Scanners"
   ],
   "SelectedNode": "\\SMT.sln",
   "PreviewInSolutionExplorer": false
