@@ -63,13 +63,9 @@ namespace SMT.scanners
                     && Path.GetExtension(FullFilePath_Match.Value).Length > 0
                     && File.Exists(FullFilePath_Match.Value))
                 {
-                    if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE")
-                    {
-                        SMTHelper.Csrss_files.Add(FullFilePath_Match.Value);
-                    }
-
                     if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Fake"))
+                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Fake")
+                         && Path.GetFileName(FullFilePath_Match.Value).ToUpper().Contains(SMTHelper.prefetchfiles.ToList().ToString()))
                     {
                         SMT.RESULTS.suspy_files.Add("Not valid digital sign on: " + FullFilePath_Match.Value + " maybe fake?");
                     }
@@ -93,16 +89,16 @@ namespace SMT.scanners
                         SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
                     }
 
-                    if (Path.GetExtension(FullFilePath_Match.Value) != ".CONFIG"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".CPL"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".NODE"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".MANIFEST"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".DLL"
-                        && Path.GetExtension(FullFilePath_Match.Value) != ".EXE"
+                    if (Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".CONFIG"
+                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".CPL"
+                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".NODE"
+                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".MANIFEST"
+                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".DLL"
+                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".EXE"
                         && File.Exists(FullFilePath_Match.Value)
                         && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
                     {
-                        SMT.RESULTS.suspy_files.Add($"External client found: {FullFilePath_Match.Value}");
+                        SMT.RESULTS.suspy_files.Add($"Spoofed extension: {FullFilePath_Match.Value}");
                     }
                 }
 
@@ -115,6 +111,8 @@ namespace SMT.scanners
                     SMT.RESULTS.suspy_files.Add("File missed: " + FullFilePath_Match.Value);
                 }
             });
+
+            #region vecchio
 
             //using (StreamReader Read_CsrssFile = new StreamReader($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt"))
             //{
@@ -177,7 +175,7 @@ namespace SMT.scanners
             //            SMT.RESULTS.suspy_files.Add("File missed: " + FullFilePath_Match.Value);
             //        }
 
-
+            #endregion
             #region ByteArray Check
             //if (FullFilePath_Match.Value.Length > 0
             //    && !Directory.Exists(FullFilePath_Match.Value)
@@ -326,7 +324,8 @@ namespace SMT.scanners
         public void SaveJavaw()
         {
             if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0
-                && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.Contains("Badlion Client"))
+                && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.Contains("Badlion Client")
+                && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.Contains("Lunar Client"))
             {
                 SMTHelper.UnProtectProcess(Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id);
                 SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -a -pid {Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
@@ -576,6 +575,7 @@ namespace SMT.scanners
             }
             catch (UnauthorizedAccessException)
             {
+                SMT.RESULTS.Errors.Add("Prefetch's permissions was manipulated, please check prefetch's permissions and restart SMT");
                 ConsoleHelper.WriteLine("Prefetch's permissions was manipulated, please check prefetch's permissions and restart SMT", ConsoleColor.Yellow);
                 Console.ReadLine();
             }
@@ -637,18 +637,10 @@ namespace SMT.scanners
             }
         } //Refractored
 
-        //public Dictionary<string, DateTime> Journal_Values()
-        //{
-        //    Dictionary<string, DateTime> fresco = new Dictionary<string, DateTime>();
-
-        //    return fresco.Keys, fresco.Values;
-        //}
-
         public void USNJournal()
         {
             #region Variabili
 
-            string[] GetPrefetch_files = Directory.GetFiles(@"C:\Windows\Prefetch\", "*.pf");
             string[] GetTemp_files = Directory.GetFiles($@"C:\Users\{Environment.UserName}\AppData\Local\Temp");
 
             Regex GetCorrect_file = new Regex(",.*?PF");

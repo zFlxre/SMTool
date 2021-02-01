@@ -154,6 +154,7 @@ namespace SMT.helpers
             }
             else
             {
+                SMT.RESULTS.Errors.Add(@"C:\ProgramData directory doesn't exist, please create it and restart smt");
                 ConsoleHelper.WriteLine(@"C:\ProgramData directory doesn't exist, please create it and restart smt", ConsoleColor.Yellow);
                 Console.ReadLine();
             }
@@ -185,6 +186,8 @@ namespace SMT.helpers
             if (check.ExitCode != 0)
             {
                 SMT.RESULTS.Errors.Add("AntiSS Tool detected, please check programs in background, some checks will be skipped");
+                Console.WriteLine("There is a problem with some checks, please disable antivirus and restart SMT");
+                Console.ReadLine();
             }
 
             check.Close();
@@ -379,10 +382,9 @@ namespace SMT.helpers
 
             if (File.ReadLines(SuspyFile).First()[0] == 'M'
                             && File.ReadLines(SuspyFile).First()[1] == 'Z'
-                            && File.ReadLines(SuspyFile).First() == "This program cannot be run in DOS mode"
+                            && File.ReadLines(SuspyFile).First().Contains("This program cannot be run in DOS mode")
                             && File.ReadAllText(SuspyFile).Contains("__std_type_info_destroy_list")
                             && File.ReadAllText(SuspyFile).Contains("__C_specific_handler")
-                            && File.ReadAllText(SuspyFile).Contains("memset")
                             && (File.ReadAllText(SuspyFile).Contains("ReadProcessMemory")
                             || File.ReadAllText(SuspyFile).Contains("WriteProcessMemory")
                             || File.ReadAllText(SuspyFile).Contains("AllocConsole")
@@ -403,8 +405,17 @@ namespace SMT.helpers
             //csrss
             try
             {
-                UnProtectProcess(Process.GetProcessesByName("csrss")[0].Id);
-                SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 4 -pid {Process.GetProcessesByName("csrss")[0].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
+                if (Process.GetProcessesByName("csrss")[0].PagedMemorySize64 > Process.GetProcessesByName("csrss")[1].PagedMemorySize64)
+                {
+                    UnProtectProcess(Process.GetProcessesByName("csrss")[0].Id);
+                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 4 -pid {Process.GetProcessesByName("csrss")[0].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
+                }
+                else
+                {
+                    UnProtectProcess(Process.GetProcessesByName("csrss")[1].Id);
+                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 4 -pid {Process.GetProcessesByName("csrss")[1].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
+
+                }
             }
             catch
             {

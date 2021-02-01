@@ -84,9 +84,6 @@ namespace SMT
                 SMTHelper.ExtractFile();
                 SMTHelper.SaveAllFiles();
 
-                //SMTHelper.getOperatingSystemInfo();
-                //SMTHelper.getProcessorInfo();
-
                 Action[] SaveAllFiles = new Action[]
                 {
                     checks.SaveJournal, //funziona
@@ -154,10 +151,10 @@ namespace SMT
 
                         foreach (ManagementObject managementObject in mos.Get())
                         {
-                            Discord.SendMessage($"Un utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp)/1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00/60}m) in uno scan!\n" +
+                            Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp)/1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00/60}m) in uno scan!\n" +
                             $"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
                             $"Processore: {processor_name.GetValue("ProcessorNameString")} \n" +
-                            $"OS: {managementObject["Caption"]} \n" +
+                            $"Versione di Windows: {managementObject["Caption"]} \n" +
                             $"RAM: {total / 1073741824}GB \n" +
                             $"Errors: {RESULTS.Errors.Count} \n" +
                             $"\n--------- Checks Count --------- \n\n" +
@@ -270,7 +267,7 @@ namespace SMT
 
                 if (RESULTS.suspy_files.Count > 0) // done
                 {
-                    ConsoleHelper.WriteLine("\nUnsigned/Spoofed File(s) Check:\n", ConsoleColor.Cyan);
+                    ConsoleHelper.WriteLine("\nGeneric file attributes Check:\n", ConsoleColor.Cyan);
                     RESULTS.suspy_files.Distinct().ToList().ForEach(suspy => ConsoleHelper.WriteLine("- " + suspy));
                 }
 
