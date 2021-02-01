@@ -16,7 +16,7 @@ namespace SMT.helpers
                 }
                 catch
                 {
-                    ConsoleHelper.WriteLine("Please check your connection!", ConsoleColor.Red);
+                    ConsoleHelper.WriteLine("Please check your connection!", ConsoleColor.Yellow);
                     Thread.Sleep(5000);
                     Environment.Exit(1);
                     return string.Empty;

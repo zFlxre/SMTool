@@ -9,7 +9,7 @@ namespace SMT
     {
         public Header()
         {
-            Console.Title = $"SMT v-{VERSION} (LGBT Edition)";
+            Console.Title = $"SMT v-{VERSION} (Eredità Edition)";
         }
 
         #region SMT's ASCII and Check Version
@@ -22,7 +22,7 @@ namespace SMT
   ╚════██║██║╚██╔╝██║   ██║   
   ███████║██║ ╚═╝ ██║   ██║   
   ╚══════╝╚═╝     ╚═╝   ╚═╝   
-                                                    Ciao amic*                " + "\n";
+                                               20 anni, sta h24 su mc e si crede bypasser, chi è?                " + "\n";
 
         public static string VERSION => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         #endregion
@@ -48,7 +48,7 @@ namespace SMT
             {
                 int indent = (Console.BufferWidth - line.Length) / 2;
                 string indentation = new string(' ', indent);
-                ConsoleHelper.WriteLine(indentation + line, ConsoleColor.Cyan);
+                ConsoleHelper.WriteLine(indentation + line, ConsoleColor.Yellow);
             }
         }
 

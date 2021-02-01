@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
-using System.Linq;
 using System.Management;
 using System.Net;
 using System.Text;
@@ -63,12 +62,8 @@ namespace SMT.scanners
                     && Path.GetExtension(FullFilePath_Match.Value).Length > 0
                     && File.Exists(FullFilePath_Match.Value))
                 {
-                    if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Fake")
-                         && Path.GetFileName(FullFilePath_Match.Value).ToUpper().Contains(SMTHelper.prefetchfiles.ToList().ToString()))
-                    {
-                        SMT.RESULTS.suspy_files.Add("Not valid digital sign on: " + FullFilePath_Match.Value + " maybe fake?");
-                    }
+
+                    #region EXE
 
                     if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
                         && (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
@@ -76,37 +71,33 @@ namespace SMT.scanners
                     {
                         SMT.RESULTS.suspy_files.Add("File with Generic Client's digital signature: " + FullFilePath_Match.Value);
                     }
-
-                    if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                    else if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Fake"))
+                    {
+                        SMT.RESULTS.suspy_files.Add("Not valid digital sign on: " + FullFilePath_Match.Value + " maybe fake?");
+                    }
+                    else if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
                         && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned"))
                     {
                         SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
                     }
 
-                    if (Path.GetExtension(FullFilePath_Match.Value) == ".DLL"
-                        && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
+                    #endregion
+
+                    #region DLL e spoof
+
+                    else if (SMTHelper.SHA256CheckSum(FullFilePath_Match.Value) == "GcMgHGh+I4ZYGFtxUXCvrMuEdGfkmj9kIokTuxMfHwk=")
                     {
-                        SMT.RESULTS.suspy_files.Add("Injected DLL found: " + FullFilePath_Match.Value);
+                        SMT.RESULTS.suspy_files.Add("Null Client found: " + FullFilePath_Match.Value);
                     }
 
-                    if (Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".CONFIG"
-                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".CPL"
-                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".NODE"
-                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".MANIFEST"
-                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".DLL"
-                        && Path.GetExtension(FullFilePath_Match.Value).ToUpper() != ".EXE"
-                        && File.Exists(FullFilePath_Match.Value)
-                        && SMTHelper.IsExternalClient(FullFilePath_Match.Value))
-                    {
-                        SMT.RESULTS.suspy_files.Add($"Spoofed extension: {FullFilePath_Match.Value}");
-                    }
+                    #endregion
                 }
-
-                if (FullFilePath_Match.Value.Length > 0
+                else if (FullFilePath_Match.Success
                     && !Directory.Exists(FullFilePath_Match.Value)
                     && Path.GetExtension(FullFilePath_Match.Value).Length > 0
                     && !File.Exists(FullFilePath_Match.Value)
-                    && Path.GetExtension(FullFilePath_Match.Value).ToUpper() == ".EXE")
+                    && Path.GetExtension(FullFilePath_Match.Value) == ".EXE")
                 {
                     SMT.RESULTS.suspy_files.Add("File missed: " + FullFilePath_Match.Value);
                 }
@@ -578,6 +569,7 @@ namespace SMT.scanners
                 SMT.RESULTS.Errors.Add("Prefetch's permissions was manipulated, please check prefetch's permissions and restart SMT");
                 ConsoleHelper.WriteLine("Prefetch's permissions was manipulated, please check prefetch's permissions and restart SMT", ConsoleColor.Yellow);
                 Console.ReadLine();
+                Environment.Exit(1);
             }
 
             #region Oldcheck

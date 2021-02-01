@@ -8,6 +8,7 @@ using System.Linq;
 using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -376,6 +377,15 @@ namespace SMT.helpers
             }
         }
 
+        public static string SHA256CheckSum(string filePath)
+        {
+            using (SHA256 SHA256 = SHA256Managed.Create())
+            {
+                using (FileStream fileStream = File.OpenRead(filePath))
+                    return Convert.ToBase64String(SHA256.ComputeHash(fileStream));
+            }
+        }
+
         public static bool IsExternalClient(string SuspyFile)
         {
             bool isClient = false;
@@ -385,11 +395,13 @@ namespace SMT.helpers
                             && File.ReadLines(SuspyFile).First().Contains("This program cannot be run in DOS mode")
                             && File.ReadAllText(SuspyFile).Contains("__std_type_info_destroy_list")
                             && File.ReadAllText(SuspyFile).Contains("__C_specific_handler")
+                            && File.ReadAllText(SuspyFile).Contains("memset")
                             && (File.ReadAllText(SuspyFile).Contains("ReadProcessMemory")
                             || File.ReadAllText(SuspyFile).Contains("WriteProcessMemory")
                             || File.ReadAllText(SuspyFile).Contains("AllocConsole")
                             || File.ReadAllText(SuspyFile).Contains("GetKeyState")
-                            || File.ReadAllText(SuspyFile).Contains("GetAsyncKeyState")))
+                            || File.ReadAllText(SuspyFile).Contains("GetAsyncKeyState"))
+                            || File.ReadAllText(SuspyFile).Contains("mouse_event"))
             {
                 isClient = true;
             }

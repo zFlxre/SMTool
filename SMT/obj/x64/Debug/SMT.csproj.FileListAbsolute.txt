@@ -8,8 +8,6 @@ C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Debug\SMT.ex
 C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Debug\SMT.pdb
 C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Debug\SMT.csprojAssemblyReference.cache
 C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Debug\SMT.csproj.Fody.CopyLocal.cache
-C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\bin\x64\Debug\AuthenticodeExaminer.xml
-C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Debug\SMT.csproj.CopyComplete
 C:\Users\Matteo\Source\Repos\SMTool_v1\SMT\obj\x64\Debug\SMT.csprojAssemblyReference.cache
 C:\Users\Matteo\Source\Repos\SMTool_v1\SMT\obj\x64\Debug\SMT.Properties.Resources.resources
 C:\Users\Matteo\Source\Repos\SMTool_v1\SMT\obj\x64\Debug\SMT.csproj.GenerateResource.cache
