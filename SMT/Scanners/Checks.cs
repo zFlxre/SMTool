@@ -87,13 +87,13 @@ namespace SMT.scanners
                     {
                         SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
                     }
-                    //else if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                    //    && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned")
-                    //    && FullFilePath_Match.Value.Contains(@"C:\WINDOWS")
-                    //    && Array.Exists(SMTHelper.prefetchfiles, E => File.GetLastWriteTime(E) >= Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime))
-                    //{
-                    //    SMT.RESULTS.suspy_files.Add("File system ran after Minecraft without digital sign: " + FullFilePath_Match.Value);
-                    //}
+                    else if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned")
+                        && FullFilePath_Match.Value.Contains(@"C:\WINDOWS")
+                        && File.ReadAllText(FullFilePath_Match.Value).Contains("mouse_event"))
+                    {
+                        SMT.RESULTS.suspy_files.Add("File system ran after Minecraft without digital sign: " + FullFilePath_Match.Value);
+                    }
 
                     #endregion
 

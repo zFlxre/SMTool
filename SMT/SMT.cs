@@ -76,7 +76,7 @@ namespace SMT
 
             header.Stages(0, "Looking 4 Minecraft");
 
-            if (!SMTHelper.isCorrectMC())
+            if (SMTHelper.isCorrectMC())
             {
                 #region Delete close button - ExtractFile - SaveFiles - Classes - Priority
 
@@ -87,8 +87,8 @@ namespace SMT
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    //checks.SaveJournal, //funziona
-                    //checks.SaveJavaw, //funziona
+                    checks.SaveJournal, //funziona
+                    checks.SaveJavaw, //funziona
                     checks.HeuristicCsrssCheck, //flag files di sistema (senza firma digitale)
                     generics.Alts_check, //funziona
                     generics.GetXrayResourcePack, //funziona
@@ -115,8 +115,8 @@ namespace SMT
 
                 Action[] scannerChecks = new Action[]
                 {
-                    //checks.USNJournal, //funziona
-                    //checks.StringScan, //funziona
+                    checks.USNJournal, //funziona
+                    checks.StringScan, //funziona
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)
@@ -227,7 +227,7 @@ namespace SMT
                         {
                             try
                             {
-                                if (RESULTS.suspy_files.Count < 10)
+                                if (RESULTS.suspy_files.Distinct().ToList().Count < 10)
                                 {
                                     Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n" +
                                     //$"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
