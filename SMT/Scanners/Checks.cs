@@ -57,10 +57,15 @@ namespace SMT.scanners
                  * 5° Check estensioni spoofate
                  */
 
+                bool isFileInPrefetch = Array.Exists(SMTHelper.prefetchfiles, E => E.Contains(Path.GetFileName(FullFilePath_Match.Value)));
+                bool isFilePrefetchCurrent = Array.Exists(SMTHelper.prefetchfiles, E => File.GetLastWriteTime(E) >= SMTHelper.PC_StartTime());
+                
                 if (FullFilePath_Match.Success
                     && !Directory.Exists(FullFilePath_Match.Value)
                     && Path.GetExtension(FullFilePath_Match.Value).Length > 0
-                    && File.Exists(FullFilePath_Match.Value))
+                    && File.Exists(FullFilePath_Match.Value)
+                    && isFileInPrefetch
+                    && isFilePrefetchCurrent)
                 {
 
                     #region EXE
@@ -74,13 +79,21 @@ namespace SMT.scanners
                     else if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
                         && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Fake"))
                     {
-                        SMT.RESULTS.suspy_files.Add("Not valid digital sign on: " + FullFilePath_Match.Value + " maybe fake?");
+                        SMT.RESULTS.suspy_files.Add("Fake digital signature: " + FullFilePath_Match.Value);
                     }
                     else if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned"))
+                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned")
+                        && !FullFilePath_Match.Value.Contains(@"C:\WINDOWS"))
                     {
                         SMT.RESULTS.suspy_files.Add("File unsigned: " + FullFilePath_Match.Value);
                     }
+                    //else if (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                    //    && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned")
+                    //    && FullFilePath_Match.Value.Contains(@"C:\WINDOWS")
+                    //    && Array.Exists(SMTHelper.prefetchfiles, E => File.GetLastWriteTime(E) >= Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime))
+                    //{
+                    //    SMT.RESULTS.suspy_files.Add("File system ran after Minecraft without digital sign: " + FullFilePath_Match.Value);
+                    //}
 
                     #endregion
 
@@ -92,15 +105,19 @@ namespace SMT.scanners
                     }
 
                     #endregion
+
                 }
                 else if (FullFilePath_Match.Success
                     && !Directory.Exists(FullFilePath_Match.Value)
                     && Path.GetExtension(FullFilePath_Match.Value).Length > 0
                     && !File.Exists(FullFilePath_Match.Value)
-                    && Path.GetExtension(FullFilePath_Match.Value) == ".EXE")
+                    && Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                    && isFileInPrefetch
+                    && isFilePrefetchCurrent)
                 {
                     SMT.RESULTS.suspy_files.Add("File missed: " + FullFilePath_Match.Value);
                 }
+
             });
 
             #region vecchio
@@ -497,7 +514,7 @@ namespace SMT.scanners
 
                     if (dodo.TimeCreated > SMTHelper.PC_StartTime() && UpdatedTime.AddMinutes(-5) > SMTHelper.PC_StartTime())
                     {
-                        SMT.RESULTS.bypass_methods.Add("USB connected at: " + dodo.TimeCreated + " please investigate");
+                        SMT.RESULTS.bypass_methods.Add("USB connected at: " + dodo.TimeCreated);
                     }
                 }
             }
@@ -531,14 +548,14 @@ namespace SMT.scanners
 
                     if (unicode_char)
                     {
-                        SMT.RESULTS.bypass_methods.Add("Special char found in PREFETCH, please investigate " + index + " Used on: " + File.GetLastWriteTime(index));
+                        SMT.RESULTS.bypass_methods.Add($"File with special char found: {index} ({File.GetLastWriteTime(index)})");
                     }
                     else if (index.ToUpper().Contains("REGEDIT.EXE")
                         && File.GetLastWriteTime(index) > Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
                     {
                         SMT.RESULTS.bypass_methods.Add("Regedit opened after minecraft start Date: " + File.GetLastWriteTime(index) + " please investigate");
                     }
-                    else if (index.ToUpper().Contains("PIF")
+                    else if (index.ToUpper().Contains(".PIF-")
                         && File.GetLastWriteTime(index) > Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
                     {
                         SMT.RESULTS.bypass_methods.Add("File with \"pif\" extension was opened after Minecraft start: " + index + " Date:" + File.GetLastWriteTime(index));
@@ -556,9 +573,9 @@ namespace SMT.scanners
                             {
                                 SMT.RESULTS.bypass_methods.Add("DLL injected with cmd: " + Prefetch.PrefetchFile.Open(index).Filenames[i]);
                             }
-                            else if (File.Exists(Prefetch.PrefetchFile.Open(index).Filenames[i]))
+                            else if (!File.Exists(Prefetch.PrefetchFile.Open(index).Filenames[i]))
                             {
-                                SMT.RESULTS.bypass_methods.Add($"DLL from {index} missed | More informations: " + Prefetch.PrefetchFile.Open(index).Filenames[i]);
+                                SMT.RESULTS.bypass_methods.Add($"DLL from {index} missed (Possible replace) | More informations: " + Prefetch.PrefetchFile.Open(index).Filenames[i]);
                             }
                         }
                     }
