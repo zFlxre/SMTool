@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,14 +56,20 @@ namespace SMT
             Checks checks = new Checks();
 
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
-            new Thread(() => {
-                while (true) {
-                    foreach (ProcessThread processThread in Process.GetCurrentProcess().Threads) {
-                        if (processThread.ThreadState != System.Diagnostics.ThreadState.Terminated) {
-                            try {
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    foreach (ProcessThread processThread in Process.GetCurrentProcess().Threads)
+                    {
+                        if (processThread.ThreadState != System.Diagnostics.ThreadState.Terminated)
+                        {
+                            try
+                            {
                                 processThread.PriorityLevel = ThreadPriorityLevel.TimeCritical;
                             }
-                            catch {
+                            catch
+                            {
 
                             }
                         }
@@ -76,9 +81,9 @@ namespace SMT
 
             header.Stages(0, "Looking 4 Minecraft");
 
-            if (SMTHelper.isCorrectMC())
+            if (!SMTHelper.isCorrectMC())
             {
-                #region Delete close button - ExtractFile - SaveFiles - Classes - Priority
+                #region Check 1 - Delete close button - ExtractFile - SaveFiles - Classes - Priority
 
                 SMTHelper.DeleteMenu(SMTHelper.GetSystemMenu(SMTHelper.GetConsoleWindow(), false), SMTHelper.SC_CLOSE, SMTHelper.MF_BYCOMMAND);
 
@@ -111,7 +116,7 @@ namespace SMT
 
                 #endregion
 
-                #region Check 1 e Check 2
+                #region Check 2
 
                 Action[] scannerChecks = new Action[]
                 {
@@ -126,13 +131,17 @@ namespace SMT
 
                 #endregion
 
-                #region Waiting for results
+                #region Waiting results
 
                 header.Stages(1, SMTHelper.CheaterJoke());
 
                 Task.WaitAll(tasks.ToArray());
 
                 header.Stages(4, "");
+
+                #endregion
+
+                #region WebHook
 
                 RegistryKey processor_name = Registry.LocalMachine.OpenSubKey(@"Hardware\Description\System\CentralProcessor\0", RegistryKeyPermissionCheck.ReadSubTree);   //This registry entry contains entry for processor info.
 
@@ -150,6 +159,8 @@ namespace SMT
                             total += (ulong)ram.GetPropertyValue("Capacity");
                         }
 
+                       
+
                         string JNativeHook, Possible_replace, Suspy, StringScan, Prefetch_Files, Bypass_Method, Event_vwr;
                         JNativeHook = Possible_replace = Suspy = StringScan = Prefetch_Files = Bypass_Method = Event_vwr = "\n";
 
@@ -157,71 +168,123 @@ namespace SMT
                         alts = xray = recycle = mouse = pst = recording = "\n";
 
                         if (RESULTS.alts.Count > 0)
+                        {
                             RESULTS.alts.Distinct().ToList().ForEach(peppe => alts += peppe + "\n");
+                        }
                         else
+                        {
                             alts += "Nothing found\n";
+                        }
 
                         if (RESULTS.recyble_bins.Count > 0)
+                        {
                             RESULTS.recyble_bins.Distinct().ToList().ForEach(peppe => recycle += peppe + "\n");
+                        }
                         else
+                        {
                             recycle += "Nothing found\n";
+                        }
 
                         if (RESULTS.mouse.Count > 0)
+                        {
                             RESULTS.mouse.Distinct().ToList().ForEach(peppe => mouse += peppe + "\n");
+                        }
                         else
+                        {
                             mouse += "Nothing found\n";
+                        }
 
                         if (RESULTS.processes_starts.Count > 0)
+                        {
                             RESULTS.processes_starts.Distinct().ToList().ForEach(peppe => pst += peppe + "\n");
+                        }
                         else
+                        {
                             pst += "Nothing found\n";
+                        }
 
                         if (RESULTS.recording_softwares.Count > 0)
+                        {
                             RESULTS.recording_softwares.Distinct().ToList().ForEach(peppe => recording += peppe + "\n");
+                        }
                         else
+                        {
                             recording += "Nothing found\n";
+                        }
 
                         if (RESULTS.xray_packs.Count > 0)
+                        {
                             RESULTS.xray_packs.Distinct().ToList().ForEach(peppe => xray += peppe + "\n");
+                        }
                         else
+                        {
                             xray += "Nothing found\n";
+                        }
 
                         //---checks
 
                         if (RESULTS.generic_jnas.Count > 0)
+                        {
                             RESULTS.generic_jnas.ForEach(peppe => JNativeHook += peppe + "\n");
+                        }
                         else
+                        {
                             JNativeHook += "Nothing found\n";
+                        }
 
                         if (RESULTS.suspy_files.Count > 0)
+                        {
                             RESULTS.suspy_files.ForEach(peppe => Suspy += peppe + "\n");
+                        }
                         else
+                        {
                             Suspy = "Nothing found\n";
+                        }
 
                         if (RESULTS.string_scan.Count > 0)
+                        {
                             RESULTS.string_scan.ForEach(peppe => StringScan += peppe + "\n");
+                        }
                         else
+                        {
                             StringScan += "Nothing found\n";
+                        }
 
                         if (RESULTS.possible_replaces.Count > 0)
+                        {
                             RESULTS.possible_replaces.ForEach(peppe => Possible_replace += peppe + "\n");
+                        }
                         else
+                        {
                             Possible_replace += "Nothing found\n";
+                        }
 
                         if (RESULTS.prefetch_files_deleted.Count > 0)
+                        {
                             RESULTS.prefetch_files_deleted.ForEach(peppe => Prefetch_Files += peppe + "\n");
+                        }
                         else
+                        {
                             Prefetch_Files += "Nothing found\n";
+                        }
 
                         if (RESULTS.bypass_methods.Count > 0)
+                        {
                             RESULTS.bypass_methods.ForEach(peppe => Bypass_Method += peppe + "\n");
+                        }
                         else
+                        {
                             Bypass_Method += "Nothing found\n";
+                        }
 
                         if (RESULTS.event_viewer_entries.Count > 0)
+                        {
                             RESULTS.event_viewer_entries.ForEach(peppe => Event_vwr += peppe + "\n");
+                        }
                         else
+                        {
                             Event_vwr += "Nothing found\n";
+                        }
 
                         foreach (ManagementObject managementObject in mos.Get())
                         {
@@ -287,14 +350,15 @@ namespace SMT
                                 RESULTS.Errors.Add("There is a problem with discord webhook\n, This problem doesn't make problems to SMT Results \nbut I want to resolve it, please contact me on Telegram @MattioneGrossoGrosso");
                             }
                         }
+
+                        
                     }
                 }
 
                 Discord.Dispose();
-
                 #endregion
 
-                #region Result System Generic(s) Information (Check 1)
+                #region Write Results (Check 1)
                 ConsoleHelper.WriteLine("Generic Informations: \n", ConsoleColor.Green);
 
                 ConsoleHelper.WriteLine("Alts:\n", ConsoleColor.Yellow); //fatto
@@ -353,7 +417,7 @@ namespace SMT
                 }
                 #endregion
 
-                #region Result System "Checks" (Check 2)
+                #region Write Results (Check 2)
 
                 ConsoleHelper.WriteLine("\nChecks:", ConsoleColor.Red);
 

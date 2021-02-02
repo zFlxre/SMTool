@@ -1,16 +1,13 @@
 ﻿using AuthenticodeExaminer;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace SMT.helpers
@@ -28,24 +25,11 @@ namespace SMT.helpers
         public const int MF_BYCOMMAND = 0x00000000;
         public const int SC_CLOSE = 0xF060;
         public static Process pr = new Process();
-        public static Process[] prlist = Process.GetProcesses();
-        public static ProcessStartInfo startInfo = new ProcessStartInfo();
         public static Random r = new Random();
         public static string[] prefetchfiles = Directory.GetFiles(@"C:\Windows\Prefetch");
-        public static string[] MinecraftProcesses = new string[] { "javaw", "launcher", "Lunar Client" };
-        public static string str, result, result2, sigcheck, strings2, unprotect;
+        public static string strings2, unprotect;
         public static int SMTDir = r.Next(1000, 9999);
         public static bool DPS = false, DNS = false, Javaw = false, DiagTrack = false;
-        public static string Csrss_Dir = "";
-
-        public static Regex virgole = new Regex(",");
-        public static Regex apostrofo = new Regex("\"");
-        public static Regex GetID = new Regex("\",0.*?,0x");
-        public static Regex leva_primevirgole = new Regex("\",.*?,");
-        public static Regex replace0x = new Regex(",0x");
-        public static Regex getaddress = new Regex("0.*?$");
-        public static Regex CinuqueVirgole = new Regex(@",.*?\|.*?,");
-        public static Regex TraApostrofo = new Regex("\".*?\"");
         #endregion
 
         public static DateTime PC_StartTime()
@@ -53,55 +37,11 @@ namespace SMT.helpers
             return DateTime.Now.AddMilliseconds(-Environment.TickCount);
         }
 
-        public static void Exit()
+        public static void Wait()
         {
             Thread.Sleep(5000);
         }
 
-        public static DateTime GetFileDateTime(string line)
-        {
-            string data_fiunzoa;
-
-            data_fiunzoa = CinuqueVirgole.Replace(line, "");
-            Match GetData = TraApostrofo.Match(data_fiunzoa);
-            data_fiunzoa = virgole.Replace(GetData.Value, "");
-            data_fiunzoa = apostrofo.Replace(data_fiunzoa, "");
-
-            return DateTime.Parse(data_fiunzoa);
-        }
-
-        public static void getOperatingSystemInfo()
-        {
-            ManagementObjectSearcher mos = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
-            foreach (ManagementObject managementObject in mos.Get())
-            {
-                if (managementObject["Caption"] != null)
-                {
-                    SMT.Discord.SendMessage("Operating System Name  :  " + managementObject["Caption"].ToString());   //Display operating system caption
-                }
-                if (managementObject["OSArchitecture"] != null)
-                {
-                    SMT.Discord.SendMessage("Operating System Architecture  :  " + managementObject["OSArchitecture"].ToString());   //Display operating system architecture.
-                }
-                if (managementObject["CSDVersion"] != null)
-                {
-                    SMT.Discord.SendMessage("Operating System Service Pack   :  " + managementObject["CSDVersion"].ToString());     //Display operating system version.
-                }
-            }
-        }
-
-        public static void getProcessorInfo()
-        {
-            RegistryKey processor_name = Registry.LocalMachine.OpenSubKey(@"Hardware\Description\System\CentralProcessor\0", RegistryKeyPermissionCheck.ReadSubTree);   //This registry entry contains entry for processor info.
-
-            if (processor_name != null)
-            {
-                if (processor_name.GetValue("ProcessorNameString") != null)
-                {
-                    SMT.Discord.SendMessage(processor_name.GetValue("ProcessorNameString").ToString());   //Display processor ingo.
-                }
-            }
-        }
         public static string GetPID(string process)
         {
             string finalpid = "";
@@ -223,7 +163,7 @@ namespace SMT.helpers
             {
                 process += "java";
             }
-            else if(Process.GetProcessesByName("javaw").Length == 0 
+            else if (Process.GetProcessesByName("javaw").Length == 0
                 && Process.GetProcessesByName("java").Length == 0
                 && Process.GetProcessesByName("launcher").Length > 0)
             {
@@ -233,18 +173,6 @@ namespace SMT.helpers
         }
 
         public static string MinecraftMainProcess = GetCorrectMCProcess();
-
-        public static string StringToByteArray(string hex)
-        {
-            int NumberChars = hex.Length;
-            byte[] bytes = new byte[NumberChars / 2];
-            for (int i = 0; i < NumberChars; i += 2)
-            {
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-            }
-
-            return bytes.ToString();
-        }
 
         public static bool isCorrectMC()
         {
@@ -258,19 +186,12 @@ namespace SMT.helpers
             return isMc;
         }
 
-        public static void Loading()
-        {
-            while (true)
-            {
-            }
-        }
-
         public static string CheaterJoke()
         {
             string Joke = "";
             int counter = 0;
             Random random = new Random();
-            int FraseRandom = random.Next(1, 22);
+            int FraseRandom = random.Next(1, 41);
 
             WebClient client = new WebClient();
             using (Stream stream = client.OpenRead("https://pastebin.com/raw/FP7qvFYL"))
@@ -280,7 +201,6 @@ namespace SMT.helpers
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        counter++;
                         if (FraseRandom == counter)
                         {
                             Joke += line;
@@ -292,24 +212,12 @@ namespace SMT.helpers
             return Joke;
         }
 
-        public static bool isFileInPrefetch(string file)
-        {
-            bool isFileInPrefetch = false;
-
-            if(prefetchfiles.Contains(Path.GetFileName(file)))
-            {
-                isFileInPrefetch = true;
-            }
-
-            return isFileInPrefetch;
-        }
-
         public static string GetSign(string file)
         {
             string signature = "";
 
-            var extractor = new FileInspector(file);
-            var validationResult = extractor.Validate();
+            FileInspector extractor = new FileInspector(file);
+            SignatureCheckResult validationResult = extractor.Validate();
 
             switch (validationResult)
             {
@@ -341,48 +249,14 @@ namespace SMT.helpers
             pr.WaitForExit();
         }
 
-        public static void GetFileBytes(string file)
-        {
-            byte[] file_lines = File.ReadAllBytes(file);
-
-            WebClient client = new WebClient();
-            string cheat, client_str;
-
-            using (Stream stream = client.OpenRead(@"https://pastebin.com/raw/byHrvMm9"))
-            {
-                using (BufferedStream bs = new BufferedStream(stream))
-                {
-                    using (StreamReader streamReader = new StreamReader(bs))
-                    {
-                        string streamReader_line;
-
-                        while ((streamReader_line = streamReader.ReadLine()) != null)
-                        {
-                            client_str = streamReader_line.Split(new char[]
-                            {
-                                    '§'
-                            })[0];
-                            cheat = streamReader_line.Split(new char[]
-                            {
-                                   '§'
-                            })[1];
-
-                            if (file_lines.ToString().Contains(StringToByteArray(client_str)))
-                            {
-                                SMT.RESULTS.string_scan.Add("Out of Instance: " + cheat + " " + file);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         public static string SHA256CheckSum(string filePath)
         {
             using (SHA256 SHA256 = SHA256Managed.Create())
             {
                 using (FileStream fileStream = File.OpenRead(filePath))
+                {
                     return Convert.ToBase64String(SHA256.ComputeHash(fileStream));
+                }
             }
         }
 
@@ -420,12 +294,12 @@ namespace SMT.helpers
                 if (Process.GetProcessesByName("csrss")[0].PagedMemorySize64 > Process.GetProcessesByName("csrss")[1].PagedMemorySize64)
                 {
                     UnProtectProcess(Process.GetProcessesByName("csrss")[0].Id);
-                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 4 -pid {Process.GetProcessesByName("csrss")[0].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
+                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -pid {Process.GetProcessesByName("csrss")[0].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
                 }
                 else
                 {
                     UnProtectProcess(Process.GetProcessesByName("csrss")[1].Id);
-                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 4 -pid {Process.GetProcessesByName("csrss")[1].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
+                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -pid {Process.GetProcessesByName("csrss")[1].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
 
                 }
             }
@@ -477,20 +351,25 @@ namespace SMT.helpers
             catch { }
 
             //DiagTrack
-            //try
-            //{
-            //    if (GetPID("DiagTrack") != " 0 ")
-            //    {
-            //        UnProtectProcess(Convert.ToInt32(GetPID("DiagTrack")));
-            //        SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
-            //        DiagTrack = true;
-            //    }
-            //    else
-            //    {
-            //        SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DiagTrack process missed)");
-            //    }
-            //}
-            //catch { }
+            try
+            {
+                if (GetPID("DiagTrack") != " 0 ")
+                {
+                    UnProtectProcess(Convert.ToInt32(GetPID("DiagTrack")));
+                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
+
+                    string[] DiagTrack_lines = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
+                    if (DiagTrack_lines.Contains("cmd.exe")
+                        && DiagTrack_lines.Contains("del")
+                        && DiagTrack_lines.Contains(".pf"))
+                        SMT.RESULTS.string_scan.Add("Found generic prefetch's file(s) Self-destruct");
+                }
+                else
+                {
+                    SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DiagTrack process missed)");
+                }
+            }
+            catch { }
 
         }
     }

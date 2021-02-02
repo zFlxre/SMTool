@@ -16,10 +16,7 @@ namespace SMT.scanners
     public class Checks
     {
         public Header header = new Header();
-
-        public static string[] MinecraftProcesses = new string[] { "javaw", "launcher", "AlphaAntiLeak" };
         public static bool can_scan = true;
-
 
         #region EventLog(s) Global Variable(s)
         public EventLog GetSecurity_log = new EventLog("Security");
@@ -59,7 +56,7 @@ namespace SMT.scanners
 
                 bool isFileInPrefetch = Array.Exists(SMTHelper.prefetchfiles, E => E.Contains(Path.GetFileName(FullFilePath_Match.Value)));
                 bool isFilePrefetchCurrent = Array.Exists(SMTHelper.prefetchfiles, E => File.GetLastWriteTime(E) >= SMTHelper.PC_StartTime());
-                
+
                 if (FullFilePath_Match.Success
                     && !Directory.Exists(FullFilePath_Match.Value)
                     && Path.GetExtension(FullFilePath_Match.Value).Length > 0
@@ -350,73 +347,6 @@ namespace SMT.scanners
             }
         }
 
-        public void SaveDiagTrack()
-        {
-            //try
-            //{
-            //    if (SMTHelper.GetPID("DiagTrack") != " 0 ")
-            //    {
-            //        SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
-            //        SMTHelper.DiagTrack = true;
-            //    }
-            //    else
-            //    {
-            //        SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DiagTrack process missed)");
-            //    }
-            //}
-            //catch { }
-        }
-
-        public void SavePcaSvc()
-        {
-            try
-            {
-                if (SMTHelper.GetPID("pcasvc") != " 0 ")
-                {
-
-                }
-                else
-                {
-                    SMT.RESULTS.bypass_methods.Add("Generic Bypass method (PcaSvc process missed)");
-                }
-            }
-            catch { }
-        }
-
-        public void SaveDNS()
-        {
-            try
-            {
-                if (SMTHelper.GetPID("Dnscache") != " 0 ")
-                {
-                    SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -pid {SMTHelper.GetPID("Dnscache")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
-                    SMTHelper.DNS = true;
-                }
-                else
-                {
-                    SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DNS process missed)");
-                }
-            }
-            catch { }
-        }
-
-        //public void SaveDPS()
-        //{
-        //    try
-        //    {
-        //        if (SMTHelper.GetPID("DPS") != " 0 ")
-        //        {
-        //            SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 19 -pid {SMTHelper.GetPID("DPS")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
-        //            SMTHelper.DPS = true;
-        //        }
-        //        else
-        //        {
-        //            SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DPS process missed)");
-        //        }
-        //    }
-        //    catch { }
-        //}
-
         public void EventVwrCheck()
         {
             string bytes = "";
@@ -589,56 +519,6 @@ namespace SMT.scanners
                 Environment.Exit(1);
             }
 
-            #region Oldcheck
-
-            //    try
-            //    {
-            //    for (int j = 0; j < SMTHelper.prefetchfiles.Length; j++)
-            //    {
-            //        unicode_char = SMTHelper.ContainsUnicodeCharacter(SMTHelper.prefetchfiles[j]);
-
-            //        if (unicode_char)
-            //        {
-            //            SMT.RESULTS.bypass_methods.Add("Special char found in PREFETCH, please investigate " + SMTHelper.prefetchfiles[j] + " Used on: " + File.GetLastWriteTime(SMTHelper.prefetchfiles[j]));
-            //        }
-            //        else if (SMTHelper.prefetchfiles[j].ToUpper().Contains("REGEDIT.EXE")
-            //            && File.GetLastWriteTime(SMTHelper.prefetchfiles[j]) > Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
-            //        {
-            //            SMT.RESULTS.bypass_methods.Add("Regedit opened after minecraft start Date: " + File.GetLastWriteTime(SMTHelper.prefetchfiles[j]) + " please investigate");
-            //        }
-            //        else if (SMTHelper.prefetchfiles[j].ToUpper().Contains("PIF")
-            //            && File.GetLastWriteTime(SMTHelper.prefetchfiles[j]) > Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
-            //        {
-            //            SMT.RESULTS.bypass_methods.Add("File with \"pif\" extension was opened after Minecraft start: " + SMTHelper.prefetchfiles[j] + " Date:" + File.GetLastWriteTime(SMTHelper.prefetchfiles[j]));
-            //        }
-            //        else if (Path.GetFileName(SMTHelper.prefetchfiles[j]).ToUpper().Contains("REGSVR32.EXE"))
-            //        {
-            //            for (int i = 0; i < Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames.Count; i++)
-            //            {
-            //                if (Path.GetExtension(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]).ToUpper() == ".DLL"
-            //                    && Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i].Length > 0
-            //                && !Directory.Exists(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i])
-            //                && Path.GetExtension(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]).Length > 0
-            //                && File.Exists(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i])
-            //                && SMTHelper.IsExternalClient(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]))
-            //                {
-            //                    SMT.RESULTS.bypass_methods.Add("DLL injected with cmd: " + Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]);
-            //                }
-            //                else if (File.Exists(Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]))
-            //                {
-            //                    SMT.RESULTS.bypass_methods.Add($"DLL from {SMTHelper.prefetchfiles[j]} missed | More informations: " + Prefetch.PrefetchFile.Open(SMTHelper.prefetchfiles[j]).Filenames[i]);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-            //catch (UnauthorizedAccessException)
-            //{
-            //    ConsoleHelper.WriteLine("Prefetch's permissions was manipulated, please check prefetch's permissions and restart SMT", ConsoleColor.Yellow);
-            //    Console.ReadLine();
-            //}
-            #endregion
-
             RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters");
             if (key.GetValue("EnablePrefetcher").ToString() != "3")
             {
@@ -656,10 +536,7 @@ namespace SMT.scanners
             Regex Exe_file = new Regex(",\".*?\",");
             Regex virgole = new Regex(",");
             Regex apostrofo = new Regex("\"");
-            Regex JNativeHook_file = new Regex("JNATIVEHOOK.*?DLL");
             Regex GetData = new Regex("\",\".*?\",");
-
-            Dictionary<string, string> File_And_Date = new Dictionary<string, string>();
 
             #endregion
 
