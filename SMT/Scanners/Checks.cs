@@ -268,9 +268,8 @@ namespace SMT.scanners
                             })[1];
 
                             if ((link == "https://pastebin.com/raw/YtQUM50C"
-                                || link == "https://pastebin.com/raw/bBtUqdJN"
-                                || link == "https://pastebin.com/raw/byHrvMm9")
-                                && file_lines.Contains(client_str))
+                                || link == "https://pastebin.com/raw/BJ388A4H")
+                                && file_lines.ToLower().Contains(client_str))
                             {
                                 SMT.RESULTS.string_scan.Add("Out of instance: " + cheat);
                             }
@@ -301,29 +300,20 @@ namespace SMT.scanners
                 StringScannerSystem("https://pastebin.com/raw/YtQUM50C", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
             }
 
+            if (SMTHelper.lsass)
+            {
+                StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\dns.txt");
+            }
+
             if (SMTHelper.DNS)
             {
                 StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
             }
 
-            if (SMTHelper.Javaw
-                && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.Contains("Badlion Client"))
+            if (SMTHelper.Javaw)
             {
                 StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
             }
-
-            Console.WriteLine("Reached!");
-
-            //if (SMTHelper.DiagTrack)
-            //{
-            //    string file_lines = File.ReadAllText($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
-
-            //    if ((file_lines.Contains("cmd.exe") && file_lines.Contains("del") && file_lines.Contains(".pf")) || file_lines.Contains("/c ping 1.1.1.1 -n 1 -w 3000 > nul & del /f /q"))
-            //    {
-            //        SMT.RESULTS.string_scan.Add($"Out of instance: Generic Command Line self-destruct Found!");
-            //    }
-            //}
-
         } //Refractored
 
         public void SaveJavaw()
@@ -340,11 +330,7 @@ namespace SMT.scanners
 
         public void SaveJournal()
         {
-            if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0)
-            {
-                SMTHelper.SaveFile("fsutil usn readjournal c: csv | findstr /i /C:\"" + "0x80000200" + "\"" + " /C:\"" + "0x00001000" + "\"" + " /C:\"" + "0x80200120" + "\"" + " /C:\"" + "0x00000800" + "\"" + $@" > C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
-                SMTHelper.Javaw = true;
-            }
+            SMTHelper.SaveFile("fsutil usn readjournal c: csv | findstr /i /C:\"" + "0x80000200" + "\"" + " /C:\"" + "0x00001000" + "\"" + " /C:\"" + "0x80200120" + "\"" + " /C:\"" + "0x00000800" + "\"" + $@" > C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
         }
 
         public void EventVwrCheck()

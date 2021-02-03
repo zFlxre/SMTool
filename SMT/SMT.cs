@@ -79,9 +79,9 @@ namespace SMT
                 }
             }).Start();
 
-            header.Stages(0, "Looking 4 Minecraft");
+            header.Stages(0, "Looking for Minecraft");
 
-            if (!SMTHelper.isCorrectMC())
+            if (SMTHelper.isCorrectMC())
             {
                 #region Check 1 - Delete close button - ExtractFile - SaveFiles - Classes - Priority
 

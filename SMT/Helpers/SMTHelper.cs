@@ -29,7 +29,7 @@ namespace SMT.helpers
         public static string[] prefetchfiles = Directory.GetFiles(@"C:\Windows\Prefetch");
         public static string strings2, unprotect;
         public static int SMTDir = r.Next(1000, 9999);
-        public static bool DPS = false, DNS = false, Javaw = false, DiagTrack = false;
+        public static bool lsass = false, DPS = false, DNS = false, Javaw = false, DiagTrack = false;
         #endregion
 
         public static DateTime PC_StartTime()
@@ -191,7 +191,7 @@ namespace SMT.helpers
             string Joke = "";
             int counter = 0;
             Random random = new Random();
-            int FraseRandom = random.Next(1, 41);
+            int FraseRandom = random.Next(1, 40);
 
             WebClient client = new WebClient();
             using (Stream stream = client.OpenRead("https://pastebin.com/raw/FP7qvFYL"))
@@ -201,6 +201,8 @@ namespace SMT.helpers
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
+                        ++counter;
+
                         if (FraseRandom == counter)
                         {
                             Joke += line;
@@ -300,7 +302,6 @@ namespace SMT.helpers
                 {
                     UnProtectProcess(Process.GetProcessesByName("csrss")[1].Id);
                     SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -pid {Process.GetProcessesByName("csrss")[1].Id} > C:\ProgramData\SMT-{SMTDir}\csrss.txt");
-
                 }
             }
             catch
@@ -322,13 +323,13 @@ namespace SMT.helpers
             }
             catch { }
 
-            //DPS (Specific)
+            //DPS
             try
             {
                 if (GetPID("DPS") != " 0 ")
                 {
                     UnProtectProcess(Convert.ToInt32(GetPID("DPS")));
-                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 19 -pid {SMTHelper.GetPID("DPS")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
+                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 19 -pid {GetPID("DPS")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
                     DPS = true;
                 }
                 else
@@ -344,8 +345,24 @@ namespace SMT.helpers
                 if (Process.GetProcessesByName("lsass")[0].Id > 0)
                 {
                     UnProtectProcess(Convert.ToInt32(Process.GetProcessesByName("lsass")[0].Id));
-                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 6 -a -pid {Process.GetProcessesByName("lsass")[0].Id} > C:\ProgramData\SMT-{SMTDir}\Browser.txt");
+                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 6 -pid {Process.GetProcessesByName("lsass")[0].Id} > C:\ProgramData\SMT-{SMTDir}\Browser.txt");
+                    lsass = true;
+                }
+            }
+            catch { }
+
+            //DNS
+            try
+            {
+                if (GetPID("dnscache") != " 0 ")
+                {
+                    UnProtectProcess(Convert.ToInt32(GetPID("dnscache")));
+                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -l 6 -pid {GetPID("dnscache")} > C:\ProgramData\SMT-{SMTDir}\dns.txt");
                     DNS = true;
+                }
+                else
+                {
+                    SMT.RESULTS.bypass_methods.Add("Generic Bypass method (DNScache process missed)");
                 }
             }
             catch { }
@@ -356,9 +373,9 @@ namespace SMT.helpers
                 if (GetPID("DiagTrack") != " 0 ")
                 {
                     UnProtectProcess(Convert.ToInt32(GetPID("DiagTrack")));
-                    SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 4 -pid {SMTHelper.GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
+                    SaveFile($@"C:\ProgramData\SMT-{SMTDir}\strings2.exe -pid {GetPID("DiagTrack")} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
 
-                    string[] DiagTrack_lines = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\utcsvc.txt");
+                    string[] DiagTrack_lines = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTDir}\utcsvc.txt");
                     if (DiagTrack_lines.Contains("cmd.exe")
                         && DiagTrack_lines.Contains("del")
                         && DiagTrack_lines.Contains(".pf"))
@@ -370,7 +387,6 @@ namespace SMT.helpers
                 }
             }
             catch { }
-
         }
     }
 }
