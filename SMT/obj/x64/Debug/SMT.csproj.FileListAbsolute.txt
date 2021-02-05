@@ -18,3 +18,5 @@ C:\Users\Matteo\Source\Repos\SMTool_v1\SMT\bin\x64\Debug\SMT.exe.config
 C:\Users\Matteo\Source\Repos\SMTool_v1\SMT\bin\x64\Debug\SMT.exe
 C:\Users\Matteo\Source\Repos\SMTool_v1\SMT\bin\x64\Debug\SMT.pdb
 C:\Users\Matteo\Source\Repos\SMTool_v1\SMT\obj\x64\Debug\SMT.csproj.Fody.CopyLocal.cache
+C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\bin\x64\Debug\NtApiDotNet.xml
+C:\Users\user\Documents\Others\Progetti\SMT-v3.0-master\SMT\obj\x64\Debug\SMT.csproj.CopyComplete

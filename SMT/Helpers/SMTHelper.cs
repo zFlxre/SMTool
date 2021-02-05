@@ -1,4 +1,5 @@
 ﻿using AuthenticodeExaminer;
+using NtApiDotNet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +9,10 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Drawing;
+using Pastel;
 
 namespace SMT.helpers
 {
@@ -285,6 +289,113 @@ namespace SMT.helpers
             return isClient;
         }
 
+        public static NtFile OpenReparseDirectory(string volume)
+        {
+            return NtFile.Open($@"\??\{volume}\$Extend\$Reparse:$R:$INDEX_ALLOCATION", null, FileAccessRights.GenericRead | FileAccessRights.Synchronize,
+                FileShareMode.Read, FileOpenOptions.OpenForBackupIntent | FileOpenOptions.SynchronousIoNonAlert);
+        }
+
+        public static string GetDirectoryFromID(string journal_line, string filemissed)
+        {
+            string directory = "";
+            string directory2 = "";
+
+            if (journal_line.ToUpper().Contains(filemissed.ToUpper()))
+            {
+                Regex due_id = new Regex("\",00.*?,.*?0x");
+                Regex virgole_e_apostrofo = new Regex("\",");
+                Regex virgola = new Regex(",");
+                Regex apostrofo = new Regex("\"");
+                Regex space = new Regex(".*? .*? ");
+                Regex spazio = new Regex(" ");
+                Regex first_ID = new Regex(".*? ");
+                Regex second_ID = new Regex(" .*? ");
+
+                Match mch = due_id.Match(journal_line);
+                string dino = virgole_e_apostrofo.Replace(mch.Value, "");
+                dino = virgola.Replace(dino, " ");
+                Match mimmo = space.Match(dino);
+
+                Match primo = first_ID.Match(mimmo.Value);
+
+                Match secondo = second_ID.Match(mimmo.Value);
+
+                if (mimmo.Success
+                && primo.Success
+                && secondo.Success)
+                {
+                    string fringuello = spazio.Replace(primo.Value, "");
+                    string fringuello2 = spazio.Replace(secondo.Value, "");
+                    long dino_pino = Convert.ToInt64(fringuello, 16);
+                    long pino_dino = Convert.ToInt64(fringuello2, 16);
+
+                    try
+                    {
+                        using (NtFile file = NtFile.OpenFileById(OpenReparseDirectory("C:"), dino_pino, FileAccessRights.ReadAttributes | FileAccessRights.Synchronize,
+                        FileShareMode.None, FileOpenOptions.DirectoryFile | FileOpenOptions.SynchronousIoNonAlert | FileOpenOptions.OpenForBackupIntent))
+                        {
+                            string filename = file.GetWin32PathName(NtApiDotNet.Win32.Win32PathNameFlags.None, false).GetResultOrDefault(primo.Value);
+                            directory = filename;
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+
+                    try
+                    {
+                        using (NtFile file = NtFile.OpenFileById(OpenReparseDirectory("C:"), pino_dino, FileAccessRights.ReadAttributes | FileAccessRights.Synchronize,
+                        FileShareMode.None, FileOpenOptions.DirectoryFile | FileOpenOptions.SynchronousIoNonAlert | FileOpenOptions.OpenForBackupIntent))
+                        {
+                            string filename = file.GetWin32PathName(NtApiDotNet.Win32.Win32PathNameFlags.None, false).GetResultOrDefault(secondo.Value);
+                            directory2 = filename;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+
+                if (directory2.Length > directory.Length)
+                {
+                    string sergio = virgola.Replace(filemissed, "");
+                    sergio = apostrofo.Replace(sergio, "");
+                    directory = directory2 + "\\" + sergio;
+                }
+                else
+                {
+                    string sergio = virgola.Replace(filemissed, "");
+                    sergio = apostrofo.Replace(sergio, "");
+                    directory = directory + "\\" + sergio;
+                }
+            }
+            return directory;
+        }
+
+        public static string Detection(string detection_type, string detection, string time)
+        {
+            string detection_return = "";
+
+            switch (detection_type)
+            {
+                case "Deleted":
+                    detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(240, 52, 52))} {"]".Pastel(Color.White)} {detection} [ { $"{time}".Pastel(Color.FromArgb(165, 229, 250))} ]";
+                    break;
+                case "Fake digital signature":
+                    detection_return = $@"{"[".Pastel(Color.White)} {"Fake digital signature".Pastel(Color.FromArgb(254, 250, 212))} {"]".Pastel(Color.White)} {detection}";
+                    break;
+                case "Moved/Renamed":
+                    detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(235, 149, 50))} {"]".Pastel(Color.White)} {detection} [ { $"{time}".Pastel(Color.FromArgb(165, 229, 250))} ]";
+                    break;
+                case "Suspicious File":
+                    detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(240, 255, 0))} {"]".Pastel(Color.White)} {detection}";
+                    break;
+            }
+
+            return detection_return;
+        }
+
         public static void SaveAllFiles()
         {
             Header header = new Header();
@@ -379,7 +490,9 @@ namespace SMT.helpers
                     if (DiagTrack_lines.Contains("cmd.exe")
                         && DiagTrack_lines.Contains("del")
                         && DiagTrack_lines.Contains(".pf"))
+                    {
                         SMT.RESULTS.string_scan.Add("Found generic prefetch's file(s) Self-destruct");
+                    }
                 }
                 else
                 {

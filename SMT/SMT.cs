@@ -81,7 +81,7 @@ namespace SMT
 
             header.Stages(0, "Looking for Minecraft");
 
-            if (SMTHelper.isCorrectMC())
+            if (!SMTHelper.isCorrectMC())
             {
                 #region Check 1 - Delete close button - ExtractFile - SaveFiles - Classes - Priority
 
@@ -92,19 +92,19 @@ namespace SMT
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    checks.SaveJournal, //funziona
-                    checks.SaveJavaw, //funziona
+                    //checks.SaveJournal, //funziona
+                    //checks.SaveJavaw, //funziona
                     checks.HeuristicCsrssCheck, //flag files di sistema (senza firma digitale)
-                    generics.Alts_check, //funziona
-                    generics.GetXrayResourcePack, //funziona
-                    generics.checkRecordingSoftwares, //funziona
-                    generics.isVM, //funziona
-                    generics.isVPN, //funziona
-                    generics.RecycleBin_check, //funziona
-                    generics.ProcessesStartup_Check, //funziona
-                    generics.GetMouse, //funziona
-                    checks.OtherChecks, //funziona
-                    checks.EventVwrCheck, //funziona
+                    //generics.Alts_check, //funziona
+                    //generics.GetXrayResourcePack, //funziona
+                    //generics.checkRecordingSoftwares, //funziona
+                    //generics.isVM, //funziona
+                    //generics.isVPN, //funziona
+                    //generics.RecycleBin_check, //funziona
+                    //generics.ProcessesStartup_Check, //funziona
+                    //generics.GetMouse, //funziona
+                    //checks.OtherChecks, //funziona
+                    //checks.EventVwrCheck, //funziona
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -120,8 +120,8 @@ namespace SMT
 
                 Action[] scannerChecks = new Action[]
                 {
-                    checks.USNJournal, //funziona
-                    checks.StringScan, //funziona
+                    //checks.USNJournal, //funziona
+                    //checks.StringScan, //funziona
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)
@@ -347,7 +347,7 @@ namespace SMT
                             }
                             catch
                             {
-                                RESULTS.Errors.Add("There is a problem with discord webhook\n, This problem doesn't make problems to SMT Results \nbut I want to resolve it, please contact me on Telegram @MattioneGrossoGrosso");
+                                
                             }
                         }
 
