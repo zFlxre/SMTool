@@ -278,10 +278,9 @@ namespace SMT.helpers
                             && File.ReadAllText(SuspyFile).Contains("memset")
                             && (File.ReadAllText(SuspyFile).Contains("ReadProcessMemory")
                             || File.ReadAllText(SuspyFile).Contains("WriteProcessMemory")
-                            || File.ReadAllText(SuspyFile).Contains("AllocConsole")
                             || File.ReadAllText(SuspyFile).Contains("GetKeyState")
-                            || File.ReadAllText(SuspyFile).Contains("GetAsyncKeyState"))
-                            || File.ReadAllText(SuspyFile).Contains("mouse_event"))
+                            || File.ReadAllText(SuspyFile).Contains("GetAsyncKeyState")
+                            || File.ReadAllText(SuspyFile).Contains("mouse_event")))
             {
                 isClient = true;
             }
@@ -382,14 +381,26 @@ namespace SMT.helpers
                 case "Deleted":
                     detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(240, 52, 52))} {"]".Pastel(Color.White)} {detection} [ { $"{time}".Pastel(Color.FromArgb(165, 229, 250))} ]";
                     break;
-                case "Fake digital signature":
-                    detection_return = $@"{"[".Pastel(Color.White)} {"Fake digital signature".Pastel(Color.FromArgb(254, 250, 212))} {"]".Pastel(Color.White)} {detection}";
+                case "Bypass method":
+                    detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(240, 52, 52))} {"]".Pastel(Color.White)} {detection} [ { $"{time}".Pastel(Color.FromArgb(165, 229, 250))} ]";
                     break;
                 case "Moved/Renamed":
                     detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(235, 149, 50))} {"]".Pastel(Color.White)} {detection} [ { $"{time}".Pastel(Color.FromArgb(165, 229, 250))} ]";
                     break;
                 case "Suspicious File":
                     detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(240, 255, 0))} {"]".Pastel(Color.White)} {detection}";
+                    break;
+                case "Fake digital signature":
+                    detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(254, 250, 212))} {"]".Pastel(Color.White)} {detection}";
+                    break;
+                case "Out of Instance":
+                    detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(240, 255, 0))} {"]".Pastel(Color.White)} {detection} [ { $"{time}".Pastel(Color.FromArgb(165, 229, 250))} ]";
+                    break;
+                case "In Instance":
+                    detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(0, 230, 64))} {"]".Pastel(Color.White)} {detection}";
+                    break;
+                case "Wmic Method":
+                    detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(140, 20, 252))} {"]".Pastel(Color.White)} {detection} [ { $"{time}".Pastel(Color.FromArgb(165, 229, 250))} ]";
                     break;
             }
 

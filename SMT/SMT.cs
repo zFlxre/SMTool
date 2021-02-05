@@ -81,7 +81,7 @@ namespace SMT
 
             header.Stages(0, "Looking for Minecraft");
 
-            if (!SMTHelper.isCorrectMC())
+            if (SMTHelper.isCorrectMC())
             {
                 #region Check 1 - Delete close button - ExtractFile - SaveFiles - Classes - Priority
 
@@ -92,19 +92,19 @@ namespace SMT
 
                 Action[] SaveAllFiles = new Action[]
                 {
-                    //checks.SaveJournal, //funziona
-                    //checks.SaveJavaw, //funziona
+                    checks.SaveJournal, //funziona
+                    checks.SaveJavaw, //funziona
                     checks.HeuristicCsrssCheck, //flag files di sistema (senza firma digitale)
-                    //generics.Alts_check, //funziona
-                    //generics.GetXrayResourcePack, //funziona
-                    //generics.checkRecordingSoftwares, //funziona
-                    //generics.isVM, //funziona
-                    //generics.isVPN, //funziona
-                    //generics.RecycleBin_check, //funziona
-                    //generics.ProcessesStartup_Check, //funziona
-                    //generics.GetMouse, //funziona
-                    //checks.OtherChecks, //funziona
-                    //checks.EventVwrCheck, //funziona
+                    generics.Alts_check, //funziona
+                    generics.GetXrayResourcePack, //funziona
+                    generics.checkRecordingSoftwares, //funziona
+                    generics.isVM, //funziona
+                    generics.isVPN, //funziona
+                    generics.RecycleBin_check, //funziona
+                    generics.ProcessesStartup_Check, //funziona
+                    generics.GetMouse, //funziona
+                    checks.OtherChecks, //funziona
+                    checks.EventVwrCheck, //funziona
                 };
 
                 for (int j = 0; j < SaveAllFiles.Length; j++)
@@ -120,8 +120,8 @@ namespace SMT
 
                 Action[] scannerChecks = new Action[]
                 {
-                    //checks.USNJournal, //funziona
-                    //checks.StringScan, //funziona
+                    checks.USNJournal, //funziona
+                    checks.StringScan, //funziona
                 };
 
                 for (int j = 0; j < scannerChecks.Length; j++)
@@ -159,9 +159,16 @@ namespace SMT
                             total += (ulong)ram.GetPropertyValue("Capacity");
                         }
 
-                       
+                        try
+                        {
+                            Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n");
+                        }
+                        catch
+                        {
 
-                        string JNativeHook, Possible_replace, Suspy, StringScan, Prefetch_Files, Bypass_Method, Event_vwr;
+                        }
+
+                         string JNativeHook, Possible_replace, Suspy, StringScan, Prefetch_Files, Bypass_Method, Event_vwr;
                         JNativeHook = Possible_replace = Suspy = StringScan = Prefetch_Files = Bypass_Method = Event_vwr = "\n";
 
                         string alts, xray, recycle, mouse, pst, recording;
@@ -223,15 +230,6 @@ namespace SMT
 
                         //---checks
 
-                        if (RESULTS.generic_jnas.Count > 0)
-                        {
-                            RESULTS.generic_jnas.ForEach(peppe => JNativeHook += peppe + "\n");
-                        }
-                        else
-                        {
-                            JNativeHook += "Nothing found\n";
-                        }
-
                         if (RESULTS.suspy_files.Count > 0)
                         {
                             RESULTS.suspy_files.ForEach(peppe => Suspy += peppe + "\n");
@@ -259,15 +257,6 @@ namespace SMT
                             Possible_replace += "Nothing found\n";
                         }
 
-                        if (RESULTS.prefetch_files_deleted.Count > 0)
-                        {
-                            RESULTS.prefetch_files_deleted.ForEach(peppe => Prefetch_Files += peppe + "\n");
-                        }
-                        else
-                        {
-                            Prefetch_Files += "Nothing found\n";
-                        }
-
                         if (RESULTS.bypass_methods.Count > 0)
                         {
                             RESULTS.bypass_methods.ForEach(peppe => Bypass_Method += peppe + "\n");
@@ -293,7 +282,7 @@ namespace SMT
                                 if (RESULTS.suspy_files.Distinct().ToList().Count < 10)
                                 {
                                     Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n" +
-                                    //$"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
+                                    $"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
                                     $"Processore: {processor_name.GetValue("ProcessorNameString")} \n" +
                                     $"Versione di Windows: {managementObject["Caption"]} \n" +
                                     $"RAM: {total / 1073741824}GB \n" +
@@ -320,7 +309,7 @@ namespace SMT
                                 else
                                 {
                                     Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n" +
-                                    //$"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
+                                    $"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
                                     $"Processore: {processor_name.GetValue("ProcessorNameString")} \n" +
                                     $"Versione di Windows: {managementObject["Caption"]} \n" +
                                     $"RAM: {total / 1073741824}GB \n" +
@@ -426,22 +415,11 @@ namespace SMT
                     RESULTS.Errors.Distinct().ToList().ForEach(jna => ConsoleHelper.WriteLine("- " + jna));
                 }
 
-                if (RESULTS.generic_jnas.Count > 0) // done
-                {
-                    ConsoleHelper.WriteLine("\nGeneric JNativeHook Clicker(s):\n", ConsoleColor.Cyan);
-                    RESULTS.generic_jnas.Distinct().ToList().ForEach(jna => ConsoleHelper.WriteLine("- " + jna));
-                }
-
                 if (RESULTS.possible_replaces.Count > 0) // done
                 {
                     ConsoleHelper.WriteLine("\nDeleted/Replaced .exe file(s):\n", ConsoleColor.Cyan);
+                    RESULTS.possible_replaces.Sort();
                     RESULTS.possible_replaces.Distinct().ToList().ForEach(replace => ConsoleHelper.WriteLine("- " + replace));
-                }
-
-                if (RESULTS.prefetch_files_deleted.Count > 0) // done
-                {
-                    ConsoleHelper.WriteLine("\nDeleted Prefetch Log(s):\n", ConsoleColor.Cyan);
-                    RESULTS.prefetch_files_deleted.Distinct().ToList().ForEach(strscn => ConsoleHelper.WriteLine("- " + strscn));
                 }
 
                 if (RESULTS.event_viewer_entries.Count > 0) // done
@@ -453,6 +431,7 @@ namespace SMT
                 if (RESULTS.suspy_files.Count > 0) // done
                 {
                     ConsoleHelper.WriteLine("\nGeneric file attributes Check:\n", ConsoleColor.Cyan);
+                    RESULTS.suspy_files.Sort();
                     RESULTS.suspy_files.Distinct().ToList().ForEach(suspy => ConsoleHelper.WriteLine("- " + suspy));
                 }
 
@@ -471,9 +450,8 @@ namespace SMT
                 #endregion
 
                 #region Nothing Found
-                if (RESULTS.prefetch_files_deleted.Count == 0
-                     && RESULTS.possible_replaces.Count == 0 && RESULTS.suspy_files.Count == 0
-                     && RESULTS.generic_jnas.Count == 0 && RESULTS.event_viewer_entries.Count == 0
+                if (RESULTS.possible_replaces.Count == 0 && RESULTS.suspy_files.Count == 0
+                     && RESULTS.event_viewer_entries.Count == 0
                      && RESULTS.string_scan.Count == 0 && RESULTS.bypass_methods.Count == 0)
                 {
                     ConsoleHelper.WriteLine("\nNothing Found", ConsoleColor.Green);

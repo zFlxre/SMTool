@@ -19,9 +19,7 @@ namespace SMT
         public List<string> event_viewer_entries { get; set; } = new List<string>();
         public List<string> possible_replaces { get; set; } = new List<string>();
         public List<string> suspy_files { get; set; } = new List<string>();
-        public List<string> generic_jnas { get; set; } = new List<string>();
         public List<string> string_scan { get; set; } = new List<string>();
-        public List<string> prefetch_files_deleted { get; set; } = new List<string>();
         public List<string> bypass_methods { get; set; } = new List<string>();
         #endregion
 
