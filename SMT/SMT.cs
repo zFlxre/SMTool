@@ -81,6 +81,20 @@ namespace SMT
 
             header.Stages(0, "Looking for Minecraft");
 
+            try
+            {
+                for (int j = 0; j < SMTHelper.prefetchfiles.Length; j++)
+                {
+
+                }
+            }
+            catch
+            {
+                ConsoleHelper.WriteLine(@"Prefetch is disabled \_(:/)_/", ConsoleColor.Yellow);
+                SMTHelper.Wait();
+                Environment.Exit(0);
+            }
+
             if (SMTHelper.isCorrectMC())
             {
                 #region Check 1 - Delete close button - ExtractFile - SaveFiles - Classes - Priority
@@ -94,12 +108,13 @@ namespace SMT
                 {
                     checks.SaveJournal, //funziona
                     checks.SaveJavaw, //funziona
-                    checks.HeuristicCsrssCheck, //flag files di sistema (senza firma digitale)
+                    checks.SaveJavaw2, //funziona
+                    checks.HeuristicCsrssCheck,
                     generics.Alts_check, //funziona
                     generics.GetXrayResourcePack, //funziona
                     generics.checkRecordingSoftwares, //funziona
                     generics.isVM, //funziona
-                    generics.isVPN, //funziona
+                    //generics.isVPN, //da rifare
                     generics.RecycleBin_check, //funziona
                     generics.ProcessesStartup_Check, //funziona
                     generics.GetMouse, //funziona
@@ -116,234 +131,216 @@ namespace SMT
 
                 #endregion
 
-                #region Check 2
-
-                Action[] scannerChecks = new Action[]
-                {
-                    checks.USNJournal, //funziona
-                    checks.StringScan, //funziona
-                };
-
-                for (int j = 0; j < scannerChecks.Length; j++)
-                {
-                    runCheckAsync(scannerChecks[j]);
-                }
-
-                #endregion
-
-                #region Waiting results
-
-                header.Stages(1, SMTHelper.CheaterJoke());
-
-                Task.WaitAll(tasks.ToArray());
+                #region Fine!
 
                 header.Stages(4, "");
 
                 #endregion
 
+                try
+                {
+                    Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n");
+                }
+                catch
+                {
+
+                }
+
                 #region WebHook
 
-                RegistryKey processor_name = Registry.LocalMachine.OpenSubKey(@"Hardware\Description\System\CentralProcessor\0", RegistryKeyPermissionCheck.ReadSubTree);   //This registry entry contains entry for processor info.
+                //RegistryKey processor_name = Registry.LocalMachine.OpenSubKey(@"Hardware\Description\System\CentralProcessor\0", RegistryKeyPermissionCheck.ReadSubTree);   //This registry entry contains entry for processor info.
 
-                if (processor_name != null)
+                //if (processor_name != null)
+                //{
+                //    if (processor_name.GetValue("ProcessorNameString") != null)
+                //    {
+                //        ManagementObjectSearcher mos = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
+                //        ManagementObjectSearcher search = new ManagementObjectSearcher("Select * From Win32_PhysicalMemory");
+
+                //        ulong total = 0;
+
+                //        foreach (ManagementObject ram in search.Get())
+                //        {
+                //            total += (ulong)ram.GetPropertyValue("Capacity");
+                //        }
+
+
+                /*
+                string JNativeHook, Possible_replace, Suspy, StringScan, Prefetch_Files, Bypass_Method, Event_vwr;
+                JNativeHook = Possible_replace = Suspy = StringScan = Prefetch_Files = Bypass_Method = Event_vwr = "\n";
+
+                string alts, xray, recycle, mouse, pst, recording;
+                alts = xray = recycle = mouse = pst = recording = "\n";
+
+                if (RESULTS.alts.Count > 0)
                 {
-                    if (processor_name.GetValue("ProcessorNameString") != null)
+                    RESULTS.alts.Distinct().ToList().ForEach(peppe => alts += peppe + "\n");
+                }
+                else
+                {
+                    alts += "Nothing found\n";
+                }
+
+                if (RESULTS.recyble_bins.Count > 0)
+                {
+                    RESULTS.recyble_bins.Distinct().ToList().ForEach(peppe => recycle += peppe + "\n");
+                }
+                else
+                {
+                    recycle += "Nothing found\n";
+                }
+
+                if (RESULTS.mouse.Count > 0)
+                {
+                    RESULTS.mouse.Distinct().ToList().ForEach(peppe => mouse += peppe + "\n");
+                }
+                else
+                {
+                    mouse += "Nothing found\n";
+                }
+
+                if (RESULTS.processes_starts.Count > 0)
+                {
+                    RESULTS.processes_starts.Distinct().ToList().ForEach(peppe => pst += peppe + "\n");
+                }
+                else
+                {
+                    pst += "Nothing found\n";
+                }
+
+                if (RESULTS.recording_softwares.Count > 0)
+                {
+                    RESULTS.recording_softwares.Distinct().ToList().ForEach(peppe => recording += peppe + "\n");
+                }
+                else
+                {
+                    recording += "Nothing found\n";
+                }
+
+                if (RESULTS.xray_packs.Count > 0)
+                {
+                    RESULTS.xray_packs.Distinct().ToList().ForEach(peppe => xray += peppe + "\n");
+                }
+                else
+                {
+                    xray += "Nothing found\n";
+                }
+
+                //---checks
+
+                if (RESULTS.suspy_files.Count > 0)
+                {
+                    RESULTS.suspy_files.ForEach(peppe => Suspy += peppe + "\n");
+                }
+                else
+                {
+                    Suspy = "Nothing found\n";
+                }
+
+                if (RESULTS.string_scan.Count > 0)
+                {
+                    RESULTS.string_scan.ForEach(peppe => StringScan += peppe + "\n");
+                }
+                else
+                {
+                    StringScan += "Nothing found\n";
+                }
+
+                if (RESULTS.possible_replaces.Count > 0)
+                {
+                    RESULTS.possible_replaces.ForEach(peppe => Possible_replace += peppe + "\n");
+                }
+                else
+                {
+                    Possible_replace += "Nothing found\n";
+                }
+
+                if (RESULTS.bypass_methods.Count > 0)
+                {
+                    RESULTS.bypass_methods.ForEach(peppe => Bypass_Method += peppe + "\n");
+                }
+                else
+                {
+                    Bypass_Method += "Nothing found\n";
+                }
+
+                if (RESULTS.event_viewer_entries.Count > 0)
+                {
+                    RESULTS.event_viewer_entries.ForEach(peppe => Event_vwr += peppe + "\n");
+                }
+                else
+                {
+                    Event_vwr += "Nothing found\n";
+                }
+
+                foreach (ManagementObject managementObject in mos.Get())
+                {
+                    try
                     {
-                        ManagementObjectSearcher mos = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
-                        ManagementObjectSearcher search = new ManagementObjectSearcher("Select * From Win32_PhysicalMemory");
-
-                        ulong total = 0;
-
-                        foreach (ManagementObject ram in search.Get())
+                        if (RESULTS.suspy_files.Distinct().ToList().Count < 10)
                         {
-                            total += (ulong)ram.GetPropertyValue("Capacity");
-                        }
-
-                        try
-                        {
-                            Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n");
-                        }
-                        catch
-                        {
-
-                        }
-
-                         string JNativeHook, Possible_replace, Suspy, StringScan, Prefetch_Files, Bypass_Method, Event_vwr;
-                        JNativeHook = Possible_replace = Suspy = StringScan = Prefetch_Files = Bypass_Method = Event_vwr = "\n";
-
-                        string alts, xray, recycle, mouse, pst, recording;
-                        alts = xray = recycle = mouse = pst = recording = "\n";
-
-                        if (RESULTS.alts.Count > 0)
-                        {
-                            RESULTS.alts.Distinct().ToList().ForEach(peppe => alts += peppe + "\n");
+                            Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n" +
+                            $"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
+                            $"Processore: {processor_name.GetValue("ProcessorNameString")} \n" +
+                            $"Versione di Windows: {managementObject["Caption"]} \n" +
+                            $"RAM: {total / 1073741824}GB \n" +
+                            $"Errors: {RESULTS.Errors.Count} \n" +
+                            $"\n--------- Generics Informations --------- \n\n" +
+                            $"Alts: {alts} \n" +
+                            $"Recycle.bin(s): {recycle} \n" +
+                            $"Process Start Time: {pst} \n" +
+                            $"Mouse(s): {mouse} \n" +
+                            $"Xray(s): {xray}\n" +
+                            $"Recording Software(s): {recording} \n" +
+                            $"VPN: {RESULTS.vpn} \n" +
+                            $"Virtual Machine: {RESULTS.virtual_machine}\n" +
+                            $"\n--------- Checks Informations --------- \n\n" +
+                            $"Deleted/Replaced .exe file(s): {Possible_replace}\n" +
+                            $"JNativeHook: {JNativeHook} \n" +
+                            $"Suspy Files: {Suspy} \n" +
+                            $"String scan: {StringScan} \n" +
+                            $"Prefetch files deleted: {Prefetch_Files} \n" +
+                            $"Bypass method(s): {Bypass_Method} \n" +
+                            $"EventVwr: {Event_vwr}");
+                            break;
                         }
                         else
                         {
-                            alts += "Nothing found\n";
+                            Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n" +
+                            $"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
+                            $"Processore: {processor_name.GetValue("ProcessorNameString")} \n" +
+                            $"Versione di Windows: {managementObject["Caption"]} \n" +
+                            $"RAM: {total / 1073741824}GB \n" +
+                            $"Errors: {RESULTS.Errors.Count} \n" +
+                            $"\n--------- Generics Informations --------- \n\n" +
+                            $"Alts: {alts} \n" +
+                            $"Recycle.bin(s): {recycle} \n" +
+                            $"Process Start Time: {pst} \n" +
+                            $"Mouse(s): {mouse} \n" +
+                            $"Xray(s): {xray}\n" +
+                            $"Recording Software(s): {recording} \n" +
+                            $"VPN: {RESULTS.vpn} \n" +
+                            $"Virtual Machine: {RESULTS.virtual_machine}\n" +
+                            $"\n--------- Checks Informations --------- \n\n" +
+                            $"Deleted/Replaced .exe file(s): {Possible_replace}\n" +
+                            $"JNativeHook: {JNativeHook} \n" +
+                            $"Suspy Files: Too long to get listed! \n" +
+                            $"String scan: {StringScan} \n" +
+                            $"Prefetch files deleted: {Prefetch_Files} \n" +
+                            $"Bypass method(s): {Bypass_Method} \n" +
+                            $"EventVwr: {Event_vwr}");
+                            break;
                         }
+                    }
+                    catch
+                    {
 
-                        if (RESULTS.recyble_bins.Count > 0)
-                        {
-                            RESULTS.recyble_bins.Distinct().ToList().ForEach(peppe => recycle += peppe + "\n");
-                        }
-                        else
-                        {
-                            recycle += "Nothing found\n";
-                        }
-
-                        if (RESULTS.mouse.Count > 0)
-                        {
-                            RESULTS.mouse.Distinct().ToList().ForEach(peppe => mouse += peppe + "\n");
-                        }
-                        else
-                        {
-                            mouse += "Nothing found\n";
-                        }
-
-                        if (RESULTS.processes_starts.Count > 0)
-                        {
-                            RESULTS.processes_starts.Distinct().ToList().ForEach(peppe => pst += peppe + "\n");
-                        }
-                        else
-                        {
-                            pst += "Nothing found\n";
-                        }
-
-                        if (RESULTS.recording_softwares.Count > 0)
-                        {
-                            RESULTS.recording_softwares.Distinct().ToList().ForEach(peppe => recording += peppe + "\n");
-                        }
-                        else
-                        {
-                            recording += "Nothing found\n";
-                        }
-
-                        if (RESULTS.xray_packs.Count > 0)
-                        {
-                            RESULTS.xray_packs.Distinct().ToList().ForEach(peppe => xray += peppe + "\n");
-                        }
-                        else
-                        {
-                            xray += "Nothing found\n";
-                        }
-
-                        //---checks
-
-                        if (RESULTS.suspy_files.Count > 0)
-                        {
-                            RESULTS.suspy_files.ForEach(peppe => Suspy += peppe + "\n");
-                        }
-                        else
-                        {
-                            Suspy = "Nothing found\n";
-                        }
-
-                        if (RESULTS.string_scan.Count > 0)
-                        {
-                            RESULTS.string_scan.ForEach(peppe => StringScan += peppe + "\n");
-                        }
-                        else
-                        {
-                            StringScan += "Nothing found\n";
-                        }
-
-                        if (RESULTS.possible_replaces.Count > 0)
-                        {
-                            RESULTS.possible_replaces.ForEach(peppe => Possible_replace += peppe + "\n");
-                        }
-                        else
-                        {
-                            Possible_replace += "Nothing found\n";
-                        }
-
-                        if (RESULTS.bypass_methods.Count > 0)
-                        {
-                            RESULTS.bypass_methods.ForEach(peppe => Bypass_Method += peppe + "\n");
-                        }
-                        else
-                        {
-                            Bypass_Method += "Nothing found\n";
-                        }
-
-                        if (RESULTS.event_viewer_entries.Count > 0)
-                        {
-                            RESULTS.event_viewer_entries.ForEach(peppe => Event_vwr += peppe + "\n");
-                        }
-                        else
-                        {
-                            Event_vwr += "Nothing found\n";
-                        }
-
-                        foreach (ManagementObject managementObject in mos.Get())
-                        {
-                            try
-                            {
-                                if (RESULTS.suspy_files.Distinct().ToList().Count < 10)
-                                {
-                                    Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n" +
-                                    $"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
-                                    $"Processore: {processor_name.GetValue("ProcessorNameString")} \n" +
-                                    $"Versione di Windows: {managementObject["Caption"]} \n" +
-                                    $"RAM: {total / 1073741824}GB \n" +
-                                    $"Errors: {RESULTS.Errors.Count} \n" +
-                                    $"\n--------- Generics Informations --------- \n\n" +
-                                    $"Alts: {alts} \n" +
-                                    $"Recycle.bin(s): {recycle} \n" +
-                                    $"Process Start Time: {pst} \n" +
-                                    $"Mouse(s): {mouse} \n" +
-                                    $"Xray(s): {xray}\n" +
-                                    $"Recording Software(s): {recording} \n" +
-                                    $"VPN: {RESULTS.vpn} \n" +
-                                    $"Virtual Machine: {RESULTS.virtual_machine}\n" +
-                                    $"\n--------- Checks Informations --------- \n\n" +
-                                    $"Deleted/Replaced .exe file(s): {Possible_replace}\n" +
-                                    $"JNativeHook: {JNativeHook} \n" +
-                                    $"Suspy Files: {Suspy} \n" +
-                                    $"String scan: {StringScan} \n" +
-                                    $"Prefetch files deleted: {Prefetch_Files} \n" +
-                                    $"Bypass method(s): {Bypass_Method} \n" +
-                                    $"EventVwr: {Event_vwr}");
-                                    break;
-                                }
-                                else
-                                {
-                                    Discord.SendMessage($"\nUn utente ha totalizzato: {getTimestamp() - startTimestamp}ms (circa: {(getTimestamp() - startTimestamp) / 1000.00}s e {(getTimestamp() - startTimestamp) / 1000.00 / 60}m) in uno scan!\n" +
-                                    $"Versione di Minecraft: " + Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle + "\n" +
-                                    $"Processore: {processor_name.GetValue("ProcessorNameString")} \n" +
-                                    $"Versione di Windows: {managementObject["Caption"]} \n" +
-                                    $"RAM: {total / 1073741824}GB \n" +
-                                    $"Errors: {RESULTS.Errors.Count} \n" +
-                                    $"\n--------- Generics Informations --------- \n\n" +
-                                    $"Alts: {alts} \n" +
-                                    $"Recycle.bin(s): {recycle} \n" +
-                                    $"Process Start Time: {pst} \n" +
-                                    $"Mouse(s): {mouse} \n" +
-                                    $"Xray(s): {xray}\n" +
-                                    $"Recording Software(s): {recording} \n" +
-                                    $"VPN: {RESULTS.vpn} \n" +
-                                    $"Virtual Machine: {RESULTS.virtual_machine}\n" +
-                                    $"\n--------- Checks Informations --------- \n\n" +
-                                    $"Deleted/Replaced .exe file(s): {Possible_replace}\n" +
-                                    $"JNativeHook: {JNativeHook} \n" +
-                                    $"Suspy Files: Too long to get listed! \n" +
-                                    $"String scan: {StringScan} \n" +
-                                    $"Prefetch files deleted: {Prefetch_Files} \n" +
-                                    $"Bypass method(s): {Bypass_Method} \n" +
-                                    $"EventVwr: {Event_vwr}");
-                                    break;
-                                }
-                            }
-                            catch
-                            {
-                                
-                            }
-                        }
-
-                        
                     }
                 }
 
+                */
+                //    }
+                //}
                 Discord.Dispose();
                 #endregion
 

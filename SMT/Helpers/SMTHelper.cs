@@ -1,8 +1,11 @@
 ﻿using AuthenticodeExaminer;
 using NtApiDotNet;
+using Pastel;
+using SMT.scanners;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -11,8 +14,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Drawing;
-using Pastel;
+using System.Threading.Tasks;
 
 namespace SMT.helpers
 {
@@ -266,6 +268,34 @@ namespace SMT.helpers
             }
         }
 
+        public static bool IsTherePrefetchValue(string original_path)
+        {
+            bool isPrefetchValue = false;
+            Regex regex = new Regex("\\\\.*?}");
+
+            Parallel.ForEach(prefetchfiles, (index) =>
+            {
+                if (index.Contains(Path.GetFileName(original_path))
+                    && File.GetLastWriteTime(index) >= PC_StartTime())
+                {
+                    for (int i = 0; i < Prefetch.PrefetchFile.Open(index).Filenames.Count; i++)
+                    {
+                        if (Path.GetExtension(Prefetch.PrefetchFile.Open(index).Filenames[i]).ToUpper()
+                            == Path.GetExtension(original_path))
+                        {
+                            string franco = regex.Replace(Prefetch.PrefetchFile.Open(index).Filenames[i], "C:");
+                            if (franco.ToUpper() == original_path.ToUpper())
+                            {
+                                isPrefetchValue = true;
+                            }
+                        }
+                    }
+                }
+            });
+
+            return isPrefetchValue;
+        }
+
         public static bool IsExternalClient(string SuspyFile)
         {
             bool isClient = false;
@@ -402,6 +432,9 @@ namespace SMT.helpers
                 case "Wmic Method":
                     detection_return = $@"{"[".Pastel(Color.White)} {$"{detection_type}".Pastel(Color.FromArgb(140, 20, 252))} {"]".Pastel(Color.White)} {detection} [ { $"{time}".Pastel(Color.FromArgb(165, 229, 250))} ]";
                     break;
+                case "Stage Progress":
+                    detection_return = $@"{"[".Pastel(Color.White)}{$"+".Pastel(Color.FromArgb(0, 230, 64))}{"]".Pastel(Color.White)} -> { $"{time}".Pastel(Color.FromArgb(165, 229, 250))}";
+                    break;
             }
 
             return detection_return;
@@ -410,7 +443,7 @@ namespace SMT.helpers
         public static void SaveAllFiles()
         {
             Header header = new Header();
-            header.Stages(0, CheaterJoke());
+            header.Stages(0, CheaterJoke() + "\n");
 
             //csrss
             try
@@ -511,6 +544,21 @@ namespace SMT.helpers
                 }
             }
             catch { }
+
+            if (SMTHelper.DPS)
+            {
+                Checks.StringScannerSystem("https://pastebin.com/raw/YtQUM50C", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
+            }
+
+            if (SMTHelper.lsass)
+            {
+                Checks.StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\dns.txt");
+            }
+
+            if (SMTHelper.DNS)
+            {
+                Checks.StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
+            }
         }
     }
 }

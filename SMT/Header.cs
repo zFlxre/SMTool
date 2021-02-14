@@ -9,7 +9,7 @@ namespace SMT
     {
         public Header()
         {
-            Console.Title = $"SMT v-{VERSION} (Eredità Edition)";
+            Console.Title = $"SMT v-{VERSION} (HuzuniLite bypass edition)";
         }
 
         #region SMT's ASCII and Check Version
@@ -22,7 +22,7 @@ namespace SMT
   ╚════██║██║╚██╔╝██║   ██║   
   ███████║██║ ╚═╝ ██║   ██║   
   ╚══════╝╚═╝     ╚═╝   ╚═╝   
-                                               20 anni, sta h24 su mc e si crede bypasser, chi è?                " + "\n";
+                                               SMT non ti salvera' dalla tua incompetenza HuzuniLite                " + "\n";
 
         public static string VERSION => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         #endregion

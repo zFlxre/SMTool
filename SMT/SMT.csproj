@@ -106,6 +106,9 @@
     <Reference Include="Prefetch">
       <HintPath>..\packages\Prefetch.dll</HintPath>
     </Reference>
+    <Reference Include="RegistryLib">
+      <HintPath>..\..\..\..\RegistryLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -124,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\DcHook.cs" />
+    <Compile Include="Helpers\RegHelper.cs" />
     <Compile Include="Helpers\VirtualDesktop.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
