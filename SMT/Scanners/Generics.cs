@@ -5,9 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
-using System.Net;
 using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -50,39 +48,9 @@ namespace SMT
                             Regex junkstr_remover = new Regex(@"\"".*?\""");
                             Match alt = junkstr_remover.Match(remove_junk1);  //Remove " from name || - "MrCreeper2010" -> MrCreeper2010
 
-                            if(alt.Value.Length > 0
-                                && alt.Value.Contains("HuzuniLite"))
-                            {
-                                SMT.RESULTS.alts.Add("We've found a player's link reference: https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.npr.org%2Fsections%2Fthetwo-way%2F2014%2F02%2F18%2F279032024%2Ftheres-a-clown-shortage-who-will-fill-those-big-shoes&psig=AOvVaw137sutK9enXXoRBHvVVS_u&ust=1612855406714000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCPjrid3g2e4CFQAAAAAdAAAAABAD");
-                            }
-                            else if (alt.Value.Length > 0)
+                            if (alt.Value.Length > 0)
                             {
                                 SMT.RESULTS.alts.Add(alt.Value);
-                                total_alts_ctr++;
-                            }
-                        }
-                        else if(launcher_profiles_line.Contains(",\"name\":"))
-                        {
-                            Regex displayname_remove = new Regex(",\"name\".*?}");
-                            Match mch = displayname_remove.Match(launcher_profiles_line);
-                            Regex remove_name = new Regex("\"name\":");
-                            Regex remove_graffe = new Regex("}");
-                            Regex remove_apostrofi = new Regex("\"");
-                            Regex remove_virgole = new Regex(",");
-
-                            string alt_finito = remove_name.Replace(mch.Value, "");
-                            alt_finito = remove_graffe.Replace(alt_finito, "");
-                            alt_finito = remove_apostrofi.Replace(alt_finito, "");
-                            alt_finito = remove_virgole.Replace(alt_finito, "");
-
-                            if (alt_finito.Length > 0
-                                && alt_finito.Contains("HuzuniLite"))
-                            {
-                                SMT.RESULTS.alts.Add("We've found a player's link reference: https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.npr.org%2Fsections%2Fthetwo-way%2F2014%2F02%2F18%2F279032024%2Ftheres-a-clown-shortage-who-will-fill-those-big-shoes&psig=AOvVaw137sutK9enXXoRBHvVVS_u&ust=1612855406714000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCPjrid3g2e4CFQAAAAAdAAAAABAD");
-                            }
-                            else if (alt_finito.Length > 0)
-                            {
-                                SMT.RESULTS.alts.Add(alt_finito);
                                 total_alts_ctr++;
                             }
                         }
@@ -96,8 +64,6 @@ namespace SMT
             {
                 SMT.RESULTS.alts.Add("No Alt(s) found(s)");
             }
-
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "Alt(s) check completed"));
         } //Refractored
 
         public void RecycleBin_check()
@@ -112,8 +78,6 @@ namespace SMT
 
                 SMT.RESULTS.recyble_bins.Add(folderInfo.Name, lastEditTime.ToString());
             }
-
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "Recycle.bin check completed"));
         } //Refractored
 
         public void checkRecordingSoftwares()
@@ -144,7 +108,6 @@ namespace SMT
                 }
             });
 
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "Recording software check completed"));
         } //Refractored
 
         public void GetMouse()
@@ -182,14 +145,19 @@ namespace SMT
 
         public void isVPN()
         {
-            //var host = Dns.GetHostEntry(Dns.GetHostName());
-            //foreach (var ip in host.AddressList)
-            //{
-            //    if (ip.AddressFamily == AddressFamily.InterNetwork)
-            //    {
-            //        SMT.RESULTS.bypass_methods.Add(WebHelper.DownloadString("https://iphub.info/?ip=185.189.112.89"));
-            //    }
-            //}
+            //Check if user is using VPN
+            // Thanks to https://stackoverflow.com/users/5593185/mike
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+                foreach (NetworkInterface Interface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (new[] { "TAP", "Windscribe", "WAN", "VPN" }.Any(c => Interface.Description.Contains(c))
+                        && Interface.OperationalStatus == OperationalStatus.Up)
+                    {
+                        SMT.RESULTS.vpn = true;
+                    }
+                }
+            }
         } //Refractored
 
         public void GetXrayResourcePack()
@@ -213,8 +181,6 @@ namespace SMT
                 });
             }
             catch { SMT.RESULTS.xray_packs.Add("Nothing Found"); }
-
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "Xray resource pack(s) check completed"));
         } //Refractored
 
         public void ProcessesStartup_Check()

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
-using System.Linq;
 using System.Management;
 using System.Net;
 using System.Text;
@@ -36,11 +35,14 @@ namespace SMT.scanners
 
         #endregion
 
+        #region Global Regex Strings
+        private readonly Regex GetFullFilePath = new Regex(@"[A-Z]:\\.*?$");
+        #endregion
+
         public void HeuristicCsrssCheck()
         {
-            Regex GetFullFilePath = new Regex(@"[A-Z]:\\.*?$");
             string[] CSRSS_file = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt");
-
+            
             Parallel.ForEach(CSRSS_file, (index) =>
             {
                 Match FullFilePath_Match = GetFullFilePath.Match(index.ToUpper());
@@ -61,36 +63,43 @@ namespace SMT.scanners
                     && Path.GetExtension(FullFilePath_Match.Value).Length > 0
                     && File.Exists(FullFilePath_Match.Value)
                     && isFileInPrefetch
-                    && isFilePrefetchCurrent
-                    && (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
-                        || Path.GetExtension(FullFilePath_Match.Value) == ".BAT"
-                        || Path.GetExtension(FullFilePath_Match.Value) == ".CMD"
-                        || Path.GetExtension(FullFilePath_Match.Value) == ".COM"
-                        || Path.GetExtension(FullFilePath_Match.Value) == ".PIF"))
+                    && isFilePrefetchCurrent)
                 {
                     #region EXE
 
-                    if ((SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
-                        || SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Mynt SASU"))
-                        && SMTHelper.IsTherePrefetchValue(FullFilePath_Match.Value))
+                    if ((Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".BAT"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".CMD"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".COM")
+                        && (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Manthe Industries")
+                        || SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Mynt SASU")))
                     {
                         SMT.RESULTS.suspy_files.Add(SMTHelper.Detection("Suspicious File", FullFilePath_Match.Value, "File ran"));
                     }
-                    else if (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Fake")
-                        && SMTHelper.IsTherePrefetchValue(FullFilePath_Match.Value))
+                    else if ((Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".BAT"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".CMD"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".COM")
+                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Fake"))
                     {
                         SMT.RESULTS.suspy_files.Add(SMTHelper.Detection("Fake digital signature", FullFilePath_Match.Value, "File ran"));
                     }
-                    else if (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned")
-                        && !FullFilePath_Match.Value.Contains(@"C:\WINDOWS")
-                        && SMTHelper.IsTherePrefetchValue(FullFilePath_Match.Value))
+                    else if ((Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".BAT"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".CMD"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".COM")
+                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned")
+                        && !FullFilePath_Match.Value.Contains(@"C:\WINDOWS"))
                     {
                         SMT.RESULTS.suspy_files.Add(SMTHelper.Detection("Suspicious File", FullFilePath_Match.Value, "File ran"));
                     }
-                    else if (SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned")
+                    else if ((Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".BAT"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".CMD"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".COM")
+                        && SMTHelper.GetSign(FullFilePath_Match.Value).Contains("Unsigned")
                         && FullFilePath_Match.Value.Contains(@"C:\WINDOWS")
-                        && File.ReadAllText(FullFilePath_Match.Value).Contains("mouse_event")
-                        && SMTHelper.IsTherePrefetchValue(FullFilePath_Match.Value))
+                        && File.ReadAllText(FullFilePath_Match.Value).Contains("mouse_event"))
                     {
                         SMT.RESULTS.suspy_files.Add(SMTHelper.Detection("Suspicious File", FullFilePath_Match.Value, "File ran"));
                     }
@@ -99,14 +108,31 @@ namespace SMT.scanners
 
                     #region Check Null Client
 
+                    else if (SMTHelper.SHA256CheckSum(FullFilePath_Match.Value) == "GcMgHGh+I4ZYGFtxUXCvrMuEdGfkmj9kIokTuxMfHwk=")
+                    {
+                        SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", "Null Client found", FullFilePath_Match.Value));
+                    }
+
                     #endregion
 
                 }
+                else if (FullFilePath_Match.Success
+                    && !Directory.Exists(FullFilePath_Match.Value)
+                    && Path.GetExtension(FullFilePath_Match.Value).Length > 0
+                    && !File.Exists(FullFilePath_Match.Value)
+                    && (Path.GetExtension(FullFilePath_Match.Value) == ".EXE"
+                    || Path.GetExtension(FullFilePath_Match.Value) == ".BAT"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".CMD"
+                        || Path.GetExtension(FullFilePath_Match.Value) == ".COM")
+                    && isFileInPrefetch
+                    && isFilePrefetchCurrent)
+                {
+                    SMT.RESULTS.possible_replaces.Add(SMTHelper.Detection("Deleted", FullFilePath_Match.Value, "File ran"));
+                }
+
             });
 
             SMT.RESULTS.suspy_files.Sort();
-
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "Suspicious file check completed"));
         } //Refractored
 
         public Process pr = new Process();
@@ -132,35 +158,17 @@ namespace SMT.scanners
             }
         }
 
-        public static void StringScannerSystem(string link, char separator, string result)
+        public void StringScannerSystem(string link, char separator, string result)
         {
             //StringScanner system by GabTeix (https://github.com/GabTeix) (project removed)
-            string file_lines = "";
-            byte[] bytes = new byte[1];
 
-            string[] test_grosso = File.ReadAllLines(result);
-
-            if (result.Contains(".txt"))
-            {
-                file_lines = File.ReadAllText(result, Encoding.Default);
-            }
-            else
-            {
-                bytes = File.ReadAllBytes(result);
-            }
+            string file_lines = File.ReadAllText(result, Encoding.Default);
 
             WebClient client = new WebClient();
             string cheat, client_str;
 
             List<string> clientsdetected = new List<string>();
             ManagementClass mngmtClass = new ManagementClass("Win32_Process");
-
-            Regex get_initialstring = new Regex(".*?/");
-            Regex remove_junkdps_strings2 = new Regex("\\.exe!.*?/");
-            Regex due_puntiescl = new Regex("!!");
-            Regex regular_string = new Regex("!!.*?!");
-            Regex remove_junk1 = new Regex("!");
-            Regex DPS_WMIC = new Regex(@".*?:");
 
             foreach (ManagementObject o in mngmtClass.GetInstances())
             {
@@ -176,8 +184,6 @@ namespace SMT.scanners
                     }
                 }
             }
-
-            Dictionary<string, string> stringa = new Dictionary<string, string>();
 
             using (Stream stream = client.OpenRead(link))
             {
@@ -198,76 +204,8 @@ namespace SMT.scanners
                                    separator
                             })[1];
 
-                            //DPS
-                            if (link == "https://pastebin.com/raw/YtQUM50C"
-                                && file_lines.ToLower().Contains(client_str))
-                            {
-                                string[] file_lines2 = File.ReadAllLines(result);
-                                string cheat_filename = "";
-
-                                Parallel.ForEach(file_lines2, (index) =>
-                                {
-                                    if (index.Contains(client_str))
-                                    {
-                                        Match mch = get_initialstring.Match(index);
-                                        int count = mch.Value.Count(f => f == '!');
-
-                                        if (count == 3)
-                                        {
-                                            //!! -> ! -> !!ciao.exe!
-                                            Match regular = regular_string.Match(index);
-                                            
-                                            //!!
-                                            cheat_filename = due_puntiescl.Replace(regular.Value, "");
-                                            
-                                            //!
-                                            cheat_filename = remove_junk1.Replace(cheat_filename, "");
-
-                                            for (int j = 0; j < SMTHelper.prefetchfiles.Length; j++)
-                                            {
-                                                if (SMTHelper.prefetchfiles[j].Contains(cheat_filename.ToUpper())
-                                                && File.GetLastWriteTime(SMTHelper.prefetchfiles[j]) >= SMTHelper.PC_StartTime())
-                                                {
-                                                    SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", cheat, "File: " + cheat_filename));
-                                                }
-                                            }
-                                        }
-                                        else if (count > 3)
-                                        {
-                                            
-                                            SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", cheat, "User tried to bypass this check adding a lot of !"));
-                                        }
-                                    }
-                                });
-                            }
-                            else if (link == "https://pastebin.com/raw/YtQUM50C")
-                            {
-                                string[] DPS_file_lines = File.ReadAllLines($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
-                                Regex get_wmic_regex = new Regex(".*?/");
-
-                                Parallel.ForEach(DPS_file_lines, (index) =>
-                                {
-                                    if (index.Contains("!")
-                                    && index.Contains(":")
-                                    && index.Contains("/"))
-                                    {
-                                        Match mch = get_wmic_regex.Match(index);
-
-                                        if (mch.Success
-                                        && mch.Value.Contains(":"))
-                                        {
-                                            //DPS
-                                            SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Wmic Method", index, "ran today"));
-                                        }
-                                    }
-                                });
-                            }
-                            else if (link == "https://pastebin.com/raw/byHrvMm9" && BitConverter.ToString(bytes).Contains(client_str))
-                            {
-                                SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", cheat, "No more informations"));
-                            }
-                            //DNS o lsass
-                            else if (link == "https://pastebin.com/raw/BJ388A4H"
+                            if ((link == "https://pastebin.com/raw/YtQUM50C"
+                                || link == "https://pastebin.com/raw/BJ388A4H")
                                 && file_lines.ToLower().Contains(client_str))
                             {
                                 SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", cheat, "No more informations"));
@@ -294,15 +232,24 @@ namespace SMT.scanners
 
         public void StringScan()
         {
-
-            if (SMTHelper.Javaw)
+            if (SMTHelper.DPS)
             {
-                StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
+                StringScannerSystem("https://pastebin.com/raw/YtQUM50C", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Specific.txt");
+            }
+
+            if (SMTHelper.lsass)
+            {
+                StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\dns.txt");
+            }
+
+            if (SMTHelper.DNS)
+            {
+                StringScannerSystem("https://pastebin.com/raw/BJ388A4H", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\Browser.txt");
             }
 
             if (SMTHelper.Javaw)
             {
-                StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw2.txt");
+                StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
             }
         } //Refractored
 
@@ -316,40 +263,11 @@ namespace SMT.scanners
                 SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -a -pid {Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
                 SMTHelper.Javaw = true;
             }
-
-            if (SMTHelper.Javaw)
-            {
-                StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw.txt");
-            }
-
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "Javaw check 1/2 completed"));
-        }
-
-        public void SaveJavaw2()
-        {
-            if (Process.GetProcessesByName(SMTHelper.MinecraftMainProcess).Length > 0
-                && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.Contains("Badlion Client")
-                && !Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].MainWindowTitle.Contains("Lunar Client"))
-            {
-                SMTHelper.UnProtectProcess(Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id);
-                SMTHelper.SaveFile($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\strings2.exe -l 6 -u -pid {Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].Id} > C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw2.txt");
-                SMTHelper.Javaw = true;
-            }
-
-            if (SMTHelper.Javaw)
-            {
-                StringScannerSystem("https://pastebin.com/raw/zh0UaeG4", '§', $@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\javaw2.txt");
-            }
-
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "Javaw check 2/2 completed"));
         }
 
         public void SaveJournal()
         {
-            SMTHelper.SaveFile($"fsutil usn readjournal c: csv | findstr /i /C:\"0x80000200\" /C:\"0x00001000\" /C:\"0x00002000\" /C:\"0x80200120\" /C:\"0x00000800\" > C:\\ProgramData\\SMT-{SMTHelper.SMTDir}\\usn_results.txt");
-            USNJournal();
-
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "USNJournal check completed"));
+            SMTHelper.SaveFile("fsutil usn readjournal c: csv | findstr /i /C:\"" + "0x80000200" + "\"" + " /C:\"" + "0x00001000" + "\"" + " /C:\"" + "0x80200120" + "\"" + " /C:\"" + "0x00000800" + "\"" + $@" > C:\ProgramData\SMT-{SMTHelper.SMTDir}\usn_results.txt");
         }
 
         public void EventVwrCheck()
@@ -469,16 +387,13 @@ namespace SMT.scanners
                 SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Bypass method", "DiagTrack was restarted", "No more informations"));
             }
 
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "Eventvwr check completed"));
         } //Refractored
-
-
 
         public void OtherChecks()
         {
             Console.OutputEncoding = Encoding.Unicode;
-            Regex regex = new Regex("\\\\.*?}");
             bool unicode_char = false;
+            Regex regex = new Regex("\\\\.*?}");
 
             string CSRSS_file = File.ReadAllText($@"C:\ProgramData\SMT-{SMTHelper.SMTDir}\csrss.txt");
 
@@ -493,44 +408,41 @@ namespace SMT.scanners
                         SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Bypass method", "Special char found", index));
                     }
                     else if (index.ToUpper().Contains("REGEDIT.EXE")
-                        && File.GetLastWriteTime(index) >= Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
+                        && File.GetLastWriteTime(index) > Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
                     {
                         SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Bypass method", "Regedit opened after Minecraft", File.GetLastWriteTime(index).ToString()));
                     }
                     else if (index.ToUpper().Contains(".PIF-")
-                        && File.GetLastWriteTime(index) >= Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
+                        && File.GetLastWriteTime(index) > Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
                     {
                         SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Bypass method", ".pif extension found", index + " " + File.GetLastWriteTime(index).ToString()));
                     }
-                    #region to review
-                    //else if ((Path.GetFileName(index).ToUpper().Contains("REGSVR32.EXE")
-                    //|| Path.GetFileName(index).ToUpper().Contains("RUNDLL32.EXE"))
-                    //&& File.GetLastWriteTime(index) >= SMTHelper.PC_StartTime())
-                    //{
-                    //    for (int i = 0; i < Prefetch.PrefetchFile.Open(index).Filenames.Count; i++)
-                    //    {
-                    //        if (Path.GetExtension(Prefetch.PrefetchFile.Open(index).Filenames[i]).Length > 0)
-                    //        {
-                    //            string franco = regex.Replace(Prefetch.PrefetchFile.Open(index).Filenames[i], "C:");
-                    //            Match mch = regex.Match(Prefetch.PrefetchFile.Open(index).Filenames[i]);
-
-                    //            if (!Directory.Exists(franco)
-                    //            && File.Exists(franco)
-                    //            && SMTHelper.GetSign(franco).Contains("Unsigned")
-                    //            && SMTHelper.IsExternalClient(franco)
-                    //            && CSRSS_file.ToUpper().Contains(franco))
-                    //            {
-                    //                SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", "DLL injected from CMD", franco));
-                    //            }
-                    //            else if (!File.Exists(franco)
-                    //            && !Directory.Exists(franco))
-                    //            {
-                    //                SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Deleted", "A suspicious DLL file was deleted in a prefetch file", franco));
-                    //            }
-                    //        }
-                    //    }
-                    //}
-                    #endregion
+                    else if (Path.GetFileName(index).ToUpper().Contains("REGSVR32.EXE")
+                    || Path.GetFileName(index).ToUpper().Contains("RUNDLL32.EXE"))
+                    {
+                        for (int i = 0; i < Prefetch.PrefetchFile.Open(index).Filenames.Count; i++)
+                        {
+                            if (Path.GetExtension(Prefetch.PrefetchFile.Open(index).Filenames[i]).Length > 0)
+                            {
+                                string franco = regex.Replace(Prefetch.PrefetchFile.Open(index).Filenames[i], "C:");
+                                Match mch = regex.Match(Prefetch.PrefetchFile.Open(index).Filenames[i]);
+                                
+                                if (!Directory.Exists(franco)
+                                && File.Exists(franco)
+                                && SMTHelper.GetSign(franco).Contains("Unsigned")
+                                && SMTHelper.IsExternalClient(franco)
+                                && CSRSS_file.ToUpper().Contains(franco))
+                                {
+                                    SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", "DLL injected from CMD", franco));
+                                }
+                                else if (!File.Exists(franco)
+                                && !Directory.Exists(franco))
+                                {
+                                    SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Deleted", "A suspicious DLL file was deleted in a prefetch file", franco));
+                                }
+                            }
+                        }
+                    }
                 });
             }
             catch (UnauthorizedAccessException)
@@ -541,57 +453,18 @@ namespace SMT.scanners
                 Environment.Exit(1);
             }
 
-            string regedit_replace = "";
-            Regex DiscoC = new Regex(@"\\Device\\HarddiskVolume4\\");
-            Regex remove_stream = new Regex(@":.*?$");
-            Regex jessica = new Regex(@".*?$");
-
-            using (RegistryKey get_subkeynames = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\bam\State\UserSettings"))
-            {
-                foreach (string subkey_name in get_subkeynames.GetSubKeyNames())
-                {
-                    using (RegistryKey correct_key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\" + subkey_name))
-                    {
-                        foreach (string values in correct_key.GetValueNames())
-                        {
-                            if (values.Contains(":")
-                                && values.Contains(@"\Device\HarddiskVolume4\"))
-                            {
-                                Match mch = jessica.Match(values);
-                                regedit_replace = DiscoC.Replace(mch.Value, "C:\\");
-
-                                SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Wmic Method", regedit_replace, "Unknow ran Date"));
-                            }
-                            else if (values.Contains(":")
-                                && !values.Contains(@"\Device\HarddiskVolume4\"))
-                            {
-                                SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Wmic method", regedit_replace, "Unknow ran Date"));
-                            }
-                        }
-                    }
-                }
-            }
-
             RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters");
-
             if (key.GetValue("EnablePrefetcher").ToString() != "3")
             {
-                SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Bypass Method", "Prefetch was disabled", "No more informations"));
+                SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Bypass Method", "Prefetch disabled", "No more informations"));
             }
-
-            if (SMTHelper.GetPID("SysMain") == " 0 ")
-            {
-                SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Bypass Method", "Prefetch was disabled", "No more informations"));
-            }
-
-            Console.WriteLine(SMTHelper.Detection("Stage Progress", "", "RAT installed, >:D"));
         } //Refractored
 
         public void USNJournal()
         {
             #region Variabili
 
-            string[] GetTemp_files = Directory.GetFiles($@"C:\Users\{Environment.UserName}\AppData\Local\Temp", "*.dll");
+            string[] GetTemp_files = Directory.GetFiles($@"C:\Users\{Environment.UserName}\AppData\Local\Temp");
 
             Regex GetCorrect_file = new Regex(",.*?PF");
             Regex Exe_file = new Regex(",\".*?\",");
@@ -615,12 +488,7 @@ namespace SMT.scanners
                  * .PF
                  */
 
-                if ((index.ToUpper().Contains(".EXE")
-                || index.ToUpper().Contains(".BAT")
-                || index.ToUpper().Contains(".CMD")
-                || index.ToUpper().Contains(".COM")
-                || index.ToUpper().Contains(".PIF"))
-                && !index.ToUpper().Contains(".PF") && index.Contains("0x80000200"))
+                if (index.ToUpper().Contains(".EXE") && !index.ToUpper().Contains(".PF") && index.Contains("0x80000200"))
                 {
                     Match mch = GetData.Match(index);
                     data_fiunzoa = apostrofo.Replace(mch.Value, "");
@@ -636,23 +504,13 @@ namespace SMT.scanners
                             file_missed = virgole.Replace(GetFile_match.Value, "");
                             file_missed = apostrofo.Replace(file_missed, "");
 
-                            if ((Path.GetExtension(file_missed).ToUpper() == ".EXE"
-                            || Path.GetExtension(file_missed).ToUpper() == ".BAT"
-                            || Path.GetExtension(file_missed).ToUpper() == ".CMD"
-                            || Path.GetExtension(file_missed).ToUpper() == ".COM"
-                            || Path.GetExtension(file_missed).ToUpper() == ".PIF"))
+                            if (Path.GetExtension(file_missed).ToUpper() == ".EXE")
                             {
                                 string directory = SMTHelper.GetDirectoryFromID(index, file_missed);
 
-                                if (directory.Contains(":\\")
-                                && SMTHelper.IsTherePrefetchValue(directory))
+                                if (directory.Contains(":\\"))
                                 {
-                                    SMT.RESULTS.possible_replaces.Add(SMTHelper.Detection("Deleted", directory, "File ran and deleted after Minecraft"));
-                                }
-                                else if(directory.Contains(":\\")
-                                && !SMTHelper.IsTherePrefetchValue(directory))
-                                {
-                                    SMT.RESULTS.possible_replaces.Add(SMTHelper.Detection("Deleted", directory, "File deleted after Minecraft but there isn't any Prefetch log"));
+                                    SMT.RESULTS.possible_replaces.Add(SMTHelper.Detection("Deleted", directory, "File deleted after Minecraft"));
                                 }
                             }
                         }
@@ -680,18 +538,13 @@ namespace SMT.scanners
 
                                 if (directory.Contains(":\\"))
                                 {
-                                    //Giornale
-                                    SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Wmic Method", file_missed, "ran today, failed to get stream"));
+                                    SMT.RESULTS.bypass_methods.Add(SMTHelper.Detection("Wmic Method", directory, "No more Informations"));
                                 }
                             }
                         }
                     }
                 }
-                if ((index.ToUpper().Contains(".EXE")
-                || index.ToUpper().Contains(".BAT")
-                || index.ToUpper().Contains(".CMD")
-                || index.ToUpper().Contains(".COM")
-                || index.ToUpper().Contains(".PIF")) && index.Contains("0x00001000"))
+                if (index.ToUpper().Contains(".EXE") && index.Contains("0x00001000"))
                 {
                     Match mch = GetData.Match(index);
                     data_fiunzoa = apostrofo.Replace(mch.Value, "");
@@ -707,11 +560,7 @@ namespace SMT.scanners
                             file_missed = virgole.Replace(GetFile_match.Value, "");
                             file_missed = apostrofo.Replace(file_missed, "");
 
-                            if (Path.GetExtension(file_missed).ToUpper() == ".EXE"
-                            || Path.GetExtension(file_missed).ToUpper() == ".BAT"
-                            || Path.GetExtension(file_missed).ToUpper() == ".CMD"
-                            || Path.GetExtension(file_missed).ToUpper() == ".COM"
-                            || Path.GetExtension(file_missed).ToUpper() == ".PIF")
+                            if (Path.GetExtension(file_missed).ToUpper() == ".EXE")
                             {
                                 string directory = SMTHelper.GetDirectoryFromID(index, file_missed);
 
@@ -746,13 +595,7 @@ namespace SMT.scanners
                         }
                     }
                 }
-                if ((index.ToUpper().Contains(".EXE")
-                || index.ToUpper().Contains(".BAT")
-                || index.ToUpper().Contains(".CMD")
-                || index.ToUpper().Contains(".COM")
-                || index.ToUpper().Contains(".PIF")) 
-                && index.ToUpper().Contains(".PF")
-                && index.Contains("0x80000200"))
+                if (index.ToUpper().Contains(".EXE") && index.ToUpper().Contains(".PF") && index.Contains("0x80000200"))
                 {
                     Match mch = GetData.Match(index);
                     data_fiunzoa = apostrofo.Replace(mch.Value, "");
@@ -780,10 +623,10 @@ namespace SMT.scanners
             for (int j = 0; j < GetTemp_files.Length; j++)
             {
                 if (GetTemp_files[j].ToUpper().Contains("JNATIVEHOOK")
-                    && File.GetLastWriteTime(GetTemp_files[j]) 
-                    >= Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
+                    && GetTemp_files[j].ToUpper().Contains(".DLL")
+                    && File.GetLastWriteTime(GetTemp_files[j]) > Process.GetProcessesByName(SMTHelper.MinecraftMainProcess)[0].StartTime)
                 {
-                    SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", "Generic JNativeHook Clicker", File.GetLastWriteTime(GetTemp_files[j])));
+                    SMT.RESULTS.string_scan.Add(SMTHelper.Detection("Out of Instance", "Generic JNativeHook Clicker", "No more Informations"));
                 }
             }
         }
